@@ -1,53 +1,28 @@
+/**
+ * main.c
+ *
+ * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
+ */
+
 #include "main.h"
 
-CFStringRef find_serial(int idVendor, int idProduct) {
-  CFMutableDictionaryRef matchingDictionary = IOServiceMatching(kIOUSBDeviceClassName);
+int main (int argc, char **argv) {
+	CFStringRef obj;
+	char serial[256];
+	int vendor_id, product_id;
 
-  CFNumberRef numberRef;
-  numberRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &idVendor);
-  CFDictionaryAddValue(matchingDictionary, CFSTR(kUSBVendorID), numberRef);
-  CFRelease(numberRef);
-  numberRef = 0;
+	vendor_id  = atoi(argv[1]);
+	product_id = atoi(argv[2]);
 
-  numberRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &idProduct);
-  CFDictionaryAddValue(matchingDictionary, CFSTR(kUSBProductID), numberRef);
-  CFRelease(numberRef);
-  numberRef = 0;
+	obj = get_serial(vendor_id, product_id);
 
-  io_iterator_t iter = NULL;
-  if (IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDictionary, &iter) == KERN_SUCCESS) {
-    io_service_t usbDeviceRef;
-    if ((usbDeviceRef = IOIteratorNext(iter))) {
-      CFMutableDictionaryRef dict = NULL;
-      if (IORegistryEntryCreateCFProperties(usbDeviceRef, &dict, kCFAllocatorDefault, kNilOptions) == KERN_SUCCESS) {
-        CFTypeRef obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
-        if (!obj) {
-          obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
-        }
-        if (obj) {
-          return CFStringCreateCopy(kCFAllocatorDefault, (CFStringRef)obj);
-        }
-      }
-    }
-  }
-  return NULL;
-}
+	if (obj) {
+		if (CFStringGetCString(obj, serial, 256, CFStringGetSystemEncoding())) {
+			printf("Serial: %s\n", serial);
+		}
+	} else {
+		printf("No matching USB devices found.\n");
+	}
 
-int main(void) {
-  CFStringRef obj;
-  
-  obj = find_serial(0x90c, 0x1000); // serial mode
-  if (!obj) {
-    obj = find_serial(0x1c34, 0x7241); // keyboard mode
-  }
-
-  if (obj) {
-    char serial[256];
-    if (CFStringGetCString(obj, serial, 256, CFStringGetSystemEncoding())) {
-      printf("got serial: %s\n", serial);
-    }
-  } else {
-    printf("No matching USB devices found\n");
-  }
-  return 0;
+	return 0;
 }
