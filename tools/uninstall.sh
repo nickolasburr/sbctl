@@ -8,7 +8,7 @@ BINDIR=$PREFIX/bin
 RM="rm"
 RMFLAGS="-rf"
 
-TARGET="usb"
+TARGET="usbctl"
 MANPAGE="$TARGET.1.gz"
 MANDEST=$PREFIX/share/man/man1
 

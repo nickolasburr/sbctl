@@ -3,7 +3,7 @@
 ###
 
 CC      = gcc
-TARGET  = usb
+TARGET  = usbctl
 INSTALL = /usr/bin/install -c
 
 prefix = /usr/local
@@ -14,21 +14,17 @@ ARFLAGS = rcs
 RM      = rm
 RMFLAGS = -rf
 
-INCLUDE = include
+INC_DIR = include
+# IOK_DIR = /System/Library/Frameworks/IOKit.framework/Headers
 SOURCES = src
 TOOLS   = tools
 
 CSFILES = $(wildcard $(SOURCES)/*.c)
 OBFILES = $(patsubst %.c,%.o,$(CSFILES))
 
-KERNEL := $(shell sh -c 'uname -s 2>/dev/null || echo unknown')
-
-CFLAGS  = -I$(INCLUDE)
+# CFLAGS  = -I$(INC_DIR) -I$(IOK_DIR) -framework IOKit
+CFLAGS  = -I$(INC_DIR) -framework CoreFoundation -framework IOKit
 LDFLAGS = -pthread -lz
-
-ifeq "$(KERNEL)" "Darwin"
-# LDFLAGS += -framework CoreFoundation -framework Security
-endif
 
 .PHONY: all clean install uninstall
 
