@@ -12,5 +12,6 @@
 #include "except.h"
 #include "argv.h"
 #include "mem.h"
+#include "serial.h"
 
 #endif /* USB_MAIN_H */
