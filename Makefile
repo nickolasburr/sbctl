@@ -3,7 +3,7 @@
 ###
 
 CC      = gcc
-TARGET  = usbctl
+TARGET  = scictl
 INSTALL = /usr/bin/install -c
 
 prefix = /usr/local
@@ -22,7 +22,6 @@ TOOLS   = tools
 CSFILES = $(wildcard $(SOURCES)/*.c)
 OBFILES = $(patsubst %.c,%.o,$(CSFILES))
 
-# CFLAGS  = -I$(INC_DIR) -I$(IOK_DIR) -framework IOKit
 CFLAGS  = -I$(INC_DIR) -framework CoreFoundation -framework IOKit
 LDFLAGS = -pthread -lz
 

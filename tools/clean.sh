@@ -3,7 +3,7 @@
 set -ex
 
 PROJ_DIR="$(dirname $PWD)"
-TARGET="usbctl"
+TARGET="scictl"
 
 if test -f "$PROJ_DIR/$TARGET"; then
 	rm -rf "$PROJ_DIR/$TARGET"
