@@ -6,7 +6,12 @@
 
 #include "serial.h"
 
-CFStringRef get_serial (int vendor_id, int product_id) {
+/**
+ * Get USB device serial number.
+ *
+ * @note Adapted from https://goo.gl/T9eXNQ
+ */
+CFStringRef get_serial_number (int vendor_id, int product_id) {
 	CFMutableDictionaryRef mdict, dict;
 	CFNumberRef num_ref;
 	io_iterator_t iter;

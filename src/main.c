@@ -14,7 +14,7 @@ int main (int argc, char **argv) {
 	vendor_id  = atoi(argv[1]);
 	product_id = atoi(argv[2]);
 
-	obj = get_serial(vendor_id, product_id);
+	obj = get_serial_number(vendor_id, product_id);
 
 	if (obj) {
 		if (CFStringGetCString(obj, serial, 256, CFStringGetSystemEncoding())) {
