@@ -13,6 +13,8 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
-CFStringRef get_serial(int, int);
+io_service_t get_usb_device (int *, int, int);
+char *get_bus_power(int *, io_service_t);
+char *get_serial_number(int *, io_service_t);
 
 #endif /* USB_SERIAL_H */

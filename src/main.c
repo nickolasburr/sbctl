@@ -7,19 +7,26 @@
 #include "main.h"
 
 int main (int argc, char **argv) {
-	CFStringRef obj;
-	char serial[256];
-	int vendor_id, product_id;
+	char *serial;
+	int sn_err, vendor_id, product_id;
 
 	vendor_id  = atoi(argv[1]);
 	product_id = atoi(argv[2]);
 
-	obj = get_serial_number(vendor_id, product_id);
+	serial = get_serial_number(&sn_err, vendor_id, product_id);
 
-	if (obj) {
-		if (CFStringGetCString(obj, serial, 256, CFStringGetSystemEncoding())) {
-			printf("Serial: %s\n", serial);
-		}
+	/**
+	 * If there were problems retrieving the
+	 * serial number, run cleanup and exit.
+	 */
+	if (sn_err) {
+		fprintf(stdout, "Error: Could not get serial number\n");
+
+		exit(EXIT_FAILURE);
+	}
+
+	if (!is_null(serial)) {
+		printf("Serial: %s\n", serial);
 	} else {
 		printf("No matching USB devices found.\n");
 	}

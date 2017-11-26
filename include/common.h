@@ -15,6 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "error.h"
+#include "mem.h"
 #include "utils.h"
 
 #ifdef __APPLE__
