@@ -10,10 +10,12 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/IOCFPlugIn.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
 io_service_t get_usb_device (int *, int, int);
+IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
 char *get_bus_power(int *, io_service_t);
 char *get_serial_number(int *, io_service_t);
 
