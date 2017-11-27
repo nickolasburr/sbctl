@@ -7,28 +7,54 @@
 #include "main.h"
 
 int main (int argc, char **argv) {
-	char *serial;
-	int sn_err, vendor_id, product_id;
+	char *power, *serial;
+	int err;
+	int vendor_id, product_id;
+	io_service_t usb_dev;
+	IOUSBDeviceInterface **di;
+	IOReturn rtn;
+	UInt8 speed;
 
 	vendor_id  = atoi(argv[1]);
 	product_id = atoi(argv[2]);
 
-	serial = get_serial_number(&sn_err, vendor_id, product_id);
+	/**
+	 * Get USB device object.
+	 */
+	usb_dev = get_usb_device(&err, vendor_id, product_id);
+
+	if (err) {
+		fprintf(stdout, "Error: Could not get USB device.\n");
+
+		exit(EXIT_FAILURE);
+	}
+
+	di = get_usb_device_interface(&err, usb_dev);
+
+	if (err) {
+		fprintf(stdout, "Error: Could not get USB device interface.\n");
+
+		exit(EXIT_FAILURE);
+	}
+
+	(*di)->GetDeviceSpeed(di, &speed);
 
 	/**
-	 * If there were problems retrieving the
-	 * serial number, run cleanup and exit.
+	 * Get serial number string.
 	 */
-	if (sn_err) {
-		fprintf(stdout, "Error: Could not get serial number\n");
+	serial = get_serial_number(&err, usb_dev);
+
+	if (err) {
+		fprintf(stdout, "Error: Could not get serial number.\n");
 
 		exit(EXIT_FAILURE);
 	}
 
 	if (!is_null(serial)) {
-		printf("Serial: %s\n", serial);
+		fprintf(stdout, "Serial: %s\n", serial);
+		fprintf(stdout, "Speed: %d\n", (int) speed);
 	} else {
-		printf("No matching USB devices found.\n");
+		fprintf(stdout, "No matching USB devices found.\n");
 	}
 
 	return 0;
