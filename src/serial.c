@@ -6,6 +6,35 @@
 
 #include "serial.h"
 
+IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
+	IOCFPlugInInterface **pi  = NULL;
+	IOUSBDeviceInterface **di = NULL;
+	IOReturn result;
+	SInt32 score;
+
+	*err = 0;
+
+	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &pi, &score);
+
+	if (!(result == kIOReturnSuccess && !is_null(pi))) {
+		goto on_error;
+	}
+
+	result = (*pi)->QueryInterface(pi, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &di);
+	(*pi)->Release(pi);
+
+	if (!(!result && !is_null(di))) {
+		goto on_error;
+	}
+
+	return di;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
 /**
  * Get USB device by vendor, product IDs.
  */
@@ -70,6 +99,7 @@ char *get_bus_power (int *err, io_service_t device) {
 	CFMutableDictionaryRef dict;
 	CFTypeRef power_ref;
 	kern_return_t status;
+	IOReturn rtn;
 
 	*err = 0;
 
@@ -88,9 +118,9 @@ char *get_bus_power (int *err, io_service_t device) {
 	if (CFStringGetCString((CFStringRef) power_ref, power, 5, CFStringGetSystemEncoding())) {
 		power_ptr = ALLOC(sizeof(power) + NULL_BYTE);
 		copy(power_ptr, power);
-
-		return power_ptr;
 	}
+
+	return power_ptr;
 
 on_error:
 	*err = 1;
@@ -106,57 +136,33 @@ on_error:
 char *get_serial_number (int *err, io_service_t device) {
 	char serial[256], *serial_ptr;
 	CFMutableDictionaryRef dict;
-	CFNumberRef num_ref;
+	CFTypeRef serial_obj;
 	io_iterator_t iter;
-	io_service_t device;
 	kern_return_t status;
 
 	*err = 0;
 
-	/**
-	 * Matching dictionary for IOUSBDevice class.
-	 */
-	mdict = IOServiceMatching(kIOUSBDeviceClassName);
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
 
-	num_ref = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vendor_id);
-	CFDictionaryAddValue(mdict, CFSTR(kUSBVendorID), num_ref);
-	CFRelease(num_ref);
-
-	num_ref = 0;
-
-	num_ref = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &product_id);
-	CFDictionaryAddValue(mdict, CFSTR(kUSBProductID), num_ref);
-	CFRelease(num_ref);
-
-	num_ref = 0;
-
-	status = IOServiceGetMatchingServices(kIOMasterPortDefault, mdict, &iter);
-
-	/**
-	 * Set marker if an error was encountered.
-	 */
 	if (status != KERN_SUCCESS) {
-		*err = 1;
-
-		return NULL;
+		goto on_error;
 	}
 
-	if ((device = IOIteratorNext(iter))) {
-		if (IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions) == KERN_SUCCESS) {
-			CFTypeRef obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
+	serial_obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
 
-			if (!obj) {
-				obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
-			}
-
-			if (obj && CFStringGetCString((CFStringRef) obj, serial, 256, CFStringGetSystemEncoding())) {
-				serial_ptr = ALLOC(sizeof(serial) + NULL_BYTE);
-				copy(serial_ptr, serial);
-
-				return serial_ptr;
-			}
-		}
+	if (!serial_obj) {
+		serial_obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
 	}
+
+	if (serial_obj && CFStringGetCString((CFStringRef) serial_obj, serial, 256, CFStringGetSystemEncoding())) {
+		serial_ptr = ALLOC(sizeof(serial) + NULL_BYTE);
+		copy(serial_ptr, serial);
+	}
+
+	return serial_ptr;
+
+on_error:
+	*err = 1;
 
 	return NULL;
 }
