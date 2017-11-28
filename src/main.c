@@ -7,13 +7,10 @@
 #include "main.h"
 
 int main (int argc, char **argv) {
-	char *power, *serial;
-	int err;
-	int vendor_id, product_id;
-	io_service_t usb_dev;
-	IOUSBDeviceInterface **di;
-	IOReturn rtn;
-	UInt8 speed;
+	char *serial;
+	int err, vendor_id, product_id, power, speed;
+	io_service_t dev;
+	IOUSBDeviceInterface **devif;
 
 	vendor_id  = atoi(argv[1]);
 	product_id = atoi(argv[2]);
@@ -21,7 +18,7 @@ int main (int argc, char **argv) {
 	/**
 	 * Get USB device object.
 	 */
-	usb_dev = get_usb_device(&err, vendor_id, product_id);
+	dev = get_usb_device(&err, vendor_id, product_id);
 
 	if (err) {
 		fprintf(stdout, "Error: Could not get USB device.\n");
@@ -29,7 +26,10 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	di = get_usb_device_interface(&err, usb_dev);
+	/**
+	 * Get USB device interface.
+	 */
+	devif = get_usb_device_interface(&err, dev);
 
 	if (err) {
 		fprintf(stdout, "Error: Could not get USB device interface.\n");
@@ -37,24 +37,43 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	(*di)->GetDeviceSpeed(di, &speed);
-
-	/**
-	 * Get serial number string.
-	 */
-	serial = get_serial_number(&err, usb_dev);
+	power = get_bus_power(&err, devif);
 
 	if (err) {
-		fprintf(stdout, "Error: Could not get serial number.\n");
+		fprintf(stdout, "Error: Could not get available bus power.\n");
 
 		exit(EXIT_FAILURE);
 	}
 
-	if (!is_null(serial)) {
-		fprintf(stdout, "Serial: %s\n", serial);
-		fprintf(stdout, "Speed: %d\n", (int) speed);
-	} else {
-		fprintf(stdout, "No matching USB devices found.\n");
+	fprintf(stdout, "Power: %d\n", power);
+
+	speed = get_device_speed(&err, devif);
+
+	if (err) {
+		fprintf(stdout, "Error: Could not get device speed.\n");
+
+		exit(EXIT_FAILURE);
+	}
+
+	switch (speed) {
+		case 1:
+			fprintf(stdout, "USB Speed: Low\n");
+
+			break;
+		case 2:
+			fprintf(stdout, "USB Speed: Full\n");
+
+			break;
+		case 3:
+			fprintf(stdout, "USB Speed: High\n");
+
+			break;
+		case 4:
+			fprintf(stdout, "USB Speed: Super\n");
+
+			break;
+		default:
+			fprintf(stdout, "USB Speed: Unknown\n");
 	}
 
 	return 0;
