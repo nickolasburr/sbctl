@@ -10,9 +10,14 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/IOKitLib.h>
+#include <IOKit/IOCFPlugIn.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
-CFStringRef get_serial(int, int);
+io_service_t get_usb_device (int *, int, int);
+IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
+int get_bus_power(int *, IOUSBDeviceInterface **);
+int get_device_speed(int *, IOUSBDeviceInterface **);
+char *get_serial_number(int *, io_service_t);
 
 #endif /* USB_SERIAL_H */

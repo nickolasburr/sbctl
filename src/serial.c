@@ -6,47 +6,171 @@
 
 #include "serial.h"
 
-CFStringRef get_serial (int vendor_id, int product_id) {
-	CFMutableDictionaryRef mdict, dict;
+IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
+	IOCFPlugInInterface **pi  = NULL;
+	IOUSBDeviceInterface **di = NULL;
+	IOReturn result;
+	SInt32 score;
+
+	*err = 0;
+
+	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &pi, &score);
+
+	if (!(result == kIOReturnSuccess && !is_null(pi))) {
+		goto on_error;
+	}
+
+	result = (*pi)->QueryInterface(pi, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &di);
+	(*pi)->Release(pi);
+
+	if (!(result == kIOReturnSuccess && !is_null(di))) {
+		goto on_error;
+	}
+
+	return di;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get USB device by vendor, product IDs.
+ */
+io_service_t get_usb_device (int *err, int vendor_id, int product_id) {
+	CFMutableDictionaryRef dict;
 	CFNumberRef num_ref;
 	io_iterator_t iter;
 	io_service_t device;
-	kern_return_t kr;
+	kern_return_t status;
+
+	*err = 0;
 
 	/**
-	 * Matching dictionary for class.
+	 * Matching dictionary for IOUSBDevice class.
 	 */
-	mdict = IOServiceMatching(kIOUSBDeviceClassName);
+	dict = IOServiceMatching(kIOUSBDeviceClassName);
 
 	num_ref = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &vendor_id);
-	CFDictionaryAddValue(mdict, CFSTR(kUSBVendorID), num_ref);
+	CFDictionaryAddValue(dict, CFSTR(kUSBVendorID), num_ref);
 	CFRelease(num_ref);
 
 	num_ref = 0;
 
 	num_ref = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &product_id);
-	CFDictionaryAddValue(mdict, CFSTR(kUSBProductID), num_ref);
+	CFDictionaryAddValue(dict, CFSTR(kUSBProductID), num_ref);
 	CFRelease(num_ref);
 
 	num_ref = 0;
 
-	if (IOServiceGetMatchingServices(kIOMasterPortDefault, mdict, &iter) != KERN_SUCCESS) {
-		return -1;
+	/**
+	 * Set matching services, get kern status.
+	 */
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
 	}
 
-	if ((device = IOIteratorNext(iter))) {
-		if (IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions) == KERN_SUCCESS) {
-			CFTypeRef obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
+	/**
+	 * Get io_service_t device object.
+	 */
+	device = IOIteratorNext(iter);
 
-			if (!obj) {
-				obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
-			}
-
-			if (obj) {
-				return CFStringCreateCopy(kCFAllocatorDefault, (CFStringRef) obj);
-			}
-		}
+	if (!device) {
+		goto on_error;
 	}
+
+	return device;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get bus power (in mA) available to USB device.
+ */
+int get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+	UInt32 power;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceBusPowerAvailable(devif, &power);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (int) power;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get USB device throughput speed.
+ */
+int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
+	UInt8 speed;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceSpeed(devif, &speed);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (int) speed;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get USB device serial number.
+ *
+ * @note Adapted from https://goo.gl/T9eXNQ
+ */
+char *get_serial_number (int *err, io_service_t device) {
+	char serial[256], *serial_ptr;
+	CFMutableDictionaryRef dict;
+	CFTypeRef serial_obj;
+	io_iterator_t iter;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	serial_obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
+
+	if (!serial_obj) {
+		serial_obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
+	}
+
+	if (serial_obj && CFStringGetCString((CFStringRef) serial_obj, serial, 256, CFStringGetSystemEncoding())) {
+		serial_ptr = ALLOC(sizeof(serial) + NULL_BYTE);
+		copy(serial_ptr, serial);
+	}
+
+	return serial_ptr;
+
+on_error:
+	*err = 1;
 
 	return NULL;
 }
