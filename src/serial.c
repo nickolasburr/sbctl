@@ -23,7 +23,7 @@ IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) 
 	result = (*pi)->QueryInterface(pi, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &di);
 	(*pi)->Release(pi);
 
-	if (!(!result && !is_null(di))) {
+	if (!(result == kIOReturnSuccess && !is_null(di))) {
 		goto on_error;
 	}
 
@@ -91,36 +91,44 @@ on_error:
 }
 
 /**
- * Get bus power available for device.
+ * Get bus power (in mA) available to USB device.
  */
-char *get_bus_power (int *err, io_service_t device) {
-	char *power_ptr;
-	char power[5];
-	CFMutableDictionaryRef dict;
-	CFTypeRef power_ref;
-	kern_return_t status;
-	IOReturn rtn;
+int get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+	UInt32 power;
+	IOReturn status;
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+	status = (*devif)->GetDeviceBusPowerAvailable(devif, &power);
 
-	if (status != KERN_SUCCESS) {
+	if (status != kIOReturnSuccess) {
 		goto on_error;
 	}
 
-	power_ref = CFDictionaryGetValue(dict, CFSTR(kUSBDevicePropertyBusPowerAvailable));
+	return (int) power;
 
-	if (!power_ref) {
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get USB device throughput speed.
+ */
+int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
+	UInt8 speed;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceSpeed(devif, &speed);
+
+	if (status != kIOReturnSuccess) {
 		goto on_error;
 	}
 
-	if (CFStringGetCString((CFStringRef) power_ref, power, 5, CFStringGetSystemEncoding())) {
-		power_ptr = ALLOC(sizeof(power) + NULL_BYTE);
-		copy(power_ptr, power);
-	}
-
-	return power_ptr;
+	return (int) speed;
 
 on_error:
 	*err = 1;
