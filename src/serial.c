@@ -7,27 +7,27 @@
 #include "serial.h"
 
 IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
-	IOCFPlugInInterface **pi  = NULL;
-	IOUSBDeviceInterface **di = NULL;
+	IOCFPlugInInterface  **plgif = NULL;
+	IOUSBDeviceInterface **devif = NULL;
 	IOReturn result;
 	SInt32 score;
 
 	*err = 0;
 
-	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &pi, &score);
+	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plgif, &score);
 
-	if (!(result == kIOReturnSuccess && !is_null(pi))) {
+	if (!(result == kIOReturnSuccess && !is_null(plgif))) {
 		goto on_error;
 	}
 
-	result = (*pi)->QueryInterface(pi, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &di);
-	(*pi)->Release(pi);
+	result = (*plgif)->QueryInterface(plgif, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &devif);
+	(*plgif)->Release(plgif);
 
-	if (!(result == kIOReturnSuccess && !is_null(di))) {
+	if (!(result == kIOReturnSuccess && !is_null(devif))) {
 		goto on_error;
 	}
 
-	return di;
+	return devif;
 
 on_error:
 	*err = 1;
@@ -129,6 +129,47 @@ int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
 	}
 
 	return (int) speed;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+long get_device_address (int *err, IOUSBDeviceInterface **devif) {
+	UInt16 addr;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceAddress(devif, &addr);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (long) addr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
+	UInt64 frame;
+	AbsoluteTime time;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetBusFrameNumber(devif, &frame, &time);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (long long) frame;
 
 on_error:
 	*err = 1;
