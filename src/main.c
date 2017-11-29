@@ -8,7 +8,8 @@
 
 int main (int argc, char **argv) {
 	char *serial;
-	int err, vendor_id, product_id, power, speed;
+	int err, vendor_id, product_id, count, power, speed;
+	long long frame;
 	io_service_t dev;
 	IOUSBDeviceInterface **devif;
 
@@ -55,25 +56,46 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	/**
+	 * Output USB device speed level.
+	 */
 	switch (speed) {
-		case 1:
+		case kUSBDeviceSpeedLow:
 			fprintf(stdout, "USB Speed: Low\n");
 
 			break;
-		case 2:
+		case kUSBDeviceSpeedFull:
 			fprintf(stdout, "USB Speed: Full\n");
 
 			break;
-		case 3:
+		case kUSBDeviceSpeedHigh:
 			fprintf(stdout, "USB Speed: High\n");
 
 			break;
-		case 4:
+		case kUSBDeviceSpeedSuper:
 			fprintf(stdout, "USB Speed: Super\n");
+
+			break;
+		case kUSBDeviceSpeedSuperPlus:
+			fprintf(stdout, "USB Speed: Super Plus\n");
 
 			break;
 		default:
 			fprintf(stdout, "USB Speed: Unknown\n");
+	}
+
+	count = 20;
+
+	while (count--) {
+		frame = get_bus_frame(&err, devif);
+
+		if (err) {
+			fprintf(stdout, "Error: Could not get bus frame.\n");
+
+			exit(EXIT_FAILURE);
+		}
+
+		fprintf(stdout, "Frame: %lld\n", frame);
 	}
 
 	return 0;
