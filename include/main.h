@@ -13,5 +13,6 @@
 #include "argv.h"
 #include "mem.h"
 #include "serial.h"
+#include "signals.h"
 
 #endif /* USB_MAIN_H */

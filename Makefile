@@ -15,7 +15,6 @@ RM      = rm
 RMFLAGS = -rf
 
 INC_DIR = include
-# IOK_DIR = /System/Library/Frameworks/IOKit.framework/Headers
 SOURCES = src
 TOOLS   = tools
 
