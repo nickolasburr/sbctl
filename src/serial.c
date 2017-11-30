@@ -6,6 +6,9 @@
 
 #include "serial.h"
 
+/**
+ * Get device interface.
+ */
 IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
 	IOCFPlugInInterface  **plgif = NULL;
 	IOUSBDeviceInterface **devif = NULL;
@@ -36,7 +39,7 @@ on_error:
 }
 
 /**
- * Get USB device by vendor, product IDs.
+ * Get device by vendor, product IDs.
  */
 io_service_t get_usb_device (int *err, int vendor_id, int product_id) {
 	CFMutableDictionaryRef dict;
@@ -91,71 +94,8 @@ on_error:
 }
 
 /**
- * Get bus power (in mA) available to USB device.
+ * Get current bus frame.
  */
-int get_bus_power (int *err, IOUSBDeviceInterface **devif) {
-	UInt32 power;
-	IOReturn status;
-
-	*err = 0;
-
-	status = (*devif)->GetDeviceBusPowerAvailable(devif, &power);
-
-	if (status != kIOReturnSuccess) {
-		goto on_error;
-	}
-
-	return (int) power;
-
-on_error:
-	*err = 1;
-
-	return NULL;
-}
-
-/**
- * Get USB device throughput speed.
- */
-int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
-	UInt8 speed;
-	IOReturn status;
-
-	*err = 0;
-
-	status = (*devif)->GetDeviceSpeed(devif, &speed);
-
-	if (status != kIOReturnSuccess) {
-		goto on_error;
-	}
-
-	return (int) speed;
-
-on_error:
-	*err = 1;
-
-	return NULL;
-}
-
-long get_device_address (int *err, IOUSBDeviceInterface **devif) {
-	UInt16 addr;
-	IOReturn status;
-
-	*err = 0;
-
-	status = (*devif)->GetDeviceAddress(devif, &addr);
-
-	if (status != kIOReturnSuccess) {
-		goto on_error;
-	}
-
-	return (long) addr;
-
-on_error:
-	*err = 1;
-
-	return NULL;
-}
-
 long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
 	UInt64 frame;
 	AbsoluteTime time;
@@ -178,7 +118,76 @@ on_error:
 }
 
 /**
- * Get USB device serial number.
+ * Get bus power (in mA) available to USB device.
+ */
+long get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+	UInt32 power;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceBusPowerAvailable(devif, &power);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (int) power;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device address.
+ */
+long get_device_address (int *err, IOUSBDeviceInterface **devif) {
+	UInt16 addr;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceAddress(devif, &addr);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (long) addr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device throughput speed.
+ */
+int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
+	UInt8 speed;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetDeviceSpeed(devif, &speed);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (int) speed;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device serial number.
  *
  * @note Adapted from https://goo.gl/T9eXNQ
  */
@@ -214,4 +223,26 @@ on_error:
 	*err = 1;
 
 	return NULL;
+}
+
+/**
+ * Reset device.
+ */
+int reset_device (int *err, IOUSBDeviceInterface **devif) {
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->ResetDevice(devif);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return 0;
+
+on_error:
+	*err = 1;
+
+	return -1;
 }

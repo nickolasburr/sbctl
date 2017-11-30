@@ -16,10 +16,11 @@
 
 io_service_t get_usb_device (int *, int, int);
 IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
-int get_bus_power(int *, IOUSBDeviceInterface **);
 long long get_bus_frame(int *, IOUSBDeviceInterface **);
+long get_bus_power(int *, IOUSBDeviceInterface **);
 long get_device_address(int *, IOUSBDeviceInterface **);
 int get_device_speed(int *, IOUSBDeviceInterface **);
 char *get_serial_number(int *, io_service_t);
+int reset_device(int *, IOUSBDeviceInterface **);
 
 #endif /* USB_SERIAL_H */
