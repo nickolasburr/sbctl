@@ -6,10 +6,13 @@
 
 #include "main.h"
 
+volatile int looping = 1;
+
 int main (int argc, char **argv) {
 	char *serial;
-	int err, vendor_id, product_id, count, power, speed;
+	int err, vendor_id, product_id, power, speed;
 	long long frame;
+	struct timespec ts;
 	io_service_t dev;
 	IOUSBDeviceInterface **devif;
 
@@ -61,32 +64,36 @@ int main (int argc, char **argv) {
 	 */
 	switch (speed) {
 		case kUSBDeviceSpeedLow:
-			fprintf(stdout, "USB Speed: Low\n");
+			fprintf(stdout, "Device Speed: Low\n");
 
 			break;
 		case kUSBDeviceSpeedFull:
-			fprintf(stdout, "USB Speed: Full\n");
+			fprintf(stdout, "Device Speed: Full\n");
 
 			break;
 		case kUSBDeviceSpeedHigh:
-			fprintf(stdout, "USB Speed: High\n");
+			fprintf(stdout, "Device Speed: High\n");
 
 			break;
 		case kUSBDeviceSpeedSuper:
-			fprintf(stdout, "USB Speed: Super\n");
+			fprintf(stdout, "Device Speed: Super\n");
 
 			break;
 		case kUSBDeviceSpeedSuperPlus:
-			fprintf(stdout, "USB Speed: Super Plus\n");
+			fprintf(stdout, "Device Speed: Super Plus\n");
 
 			break;
 		default:
-			fprintf(stdout, "USB Speed: Unknown\n");
+			fprintf(stdout, "Device Speed: Unknown\n");
 	}
 
-	count = 20;
+	signal(SIGINT, on_signal);
+	signal(SIGHUP, on_signal);
 
-	while (count--) {
+	ts.tv_sec = 0;
+	ts.tv_nsec = 2500000L;
+
+	while (looping) {
 		frame = get_bus_frame(&err, devif);
 
 		if (err) {
@@ -95,7 +102,10 @@ int main (int argc, char **argv) {
 			exit(EXIT_FAILURE);
 		}
 
-		fprintf(stdout, "Frame: %lld\n", frame);
+		fprintf(stdout, "\rFrame: %lld", frame);
+		fflush(stdout);
+
+		nanosleep(&ts, NULL);
 	}
 
 	return 0;
