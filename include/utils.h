@@ -13,6 +13,8 @@
 #include <fcntl.h>
 #include "common.h"
 
+#define is_null(ptr) ((ptr) == ((void *) 0))
+
 /**
  * String utilities
  */
@@ -49,7 +51,6 @@ int is_char(const char *);
  */
 
 int is_digit(int);
-int is_null(void *);
 int is_numeric(char *);
 
 #endif /* USB_UTILS_H */
