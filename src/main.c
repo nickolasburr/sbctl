@@ -64,27 +64,27 @@ int main (int argc, char **argv) {
 	 */
 	switch (speed) {
 		case kUSBDeviceSpeedLow:
-			fprintf(stdout, "Device Speed: Low\n");
+			fprintf(stdout, "Speed: Low\n");
 
 			break;
 		case kUSBDeviceSpeedFull:
-			fprintf(stdout, "Device Speed: Full\n");
+			fprintf(stdout, "Speed: Full\n");
 
 			break;
 		case kUSBDeviceSpeedHigh:
-			fprintf(stdout, "Device Speed: High\n");
+			fprintf(stdout, "Speed: High\n");
 
 			break;
 		case kUSBDeviceSpeedSuper:
-			fprintf(stdout, "Device Speed: Super\n");
+			fprintf(stdout, "Speed: Super\n");
 
 			break;
 		case kUSBDeviceSpeedSuperPlus:
-			fprintf(stdout, "Device Speed: Super Plus\n");
+			fprintf(stdout, "Speed: Super Plus\n");
 
 			break;
 		default:
-			fprintf(stdout, "Device Speed: Unknown\n");
+			fprintf(stdout, "Speed: Unknown\n");
 	}
 
 	signal(SIGINT, on_signal);
