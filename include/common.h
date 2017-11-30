@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 #include "error.h"
 #include "mem.h"
@@ -30,5 +31,7 @@
 #define NULL_DEVICE "/dev/null"
 #define NOT_FOUND -1
 #define NULL_BYTE 1
+
+extern volatile int looping;
 
 #endif /* USB_COMMON_H */
