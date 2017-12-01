@@ -7,38 +7,6 @@
 #include "serial.h"
 
 /**
- * Get device interface.
- */
-IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
-	IOCFPlugInInterface  **plgif = NULL;
-	IOUSBDeviceInterface **devif = NULL;
-	IOReturn result;
-	SInt32 score;
-
-	*err = 0;
-
-	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plgif, &score);
-
-	if (!(result == kIOReturnSuccess && !is_null(plgif))) {
-		goto on_error;
-	}
-
-	result = (*plgif)->QueryInterface(plgif, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &devif);
-	(*plgif)->Release(plgif);
-
-	if (!(result == kIOReturnSuccess && !is_null(devif))) {
-		goto on_error;
-	}
-
-	return devif;
-
-on_error:
-	*err = 1;
-
-	return NULL;
-}
-
-/**
  * Get device by vendor, product IDs.
  */
 io_service_t get_usb_device (int *err, int vendor_id, int product_id) {
@@ -86,6 +54,87 @@ io_service_t get_usb_device (int *err, int vendor_id, int product_id) {
 	}
 
 	return device;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get all USB devices accessible in IORegistry.
+ */
+void get_usb_devices (int *err, SerialDeviceInterface *serif) {
+	int index;
+	CFMutableDictionaryRef mdict, dict;
+	io_iterator_t iter;
+	io_service_t dev;
+	kern_return_t status;
+
+	*err = 0;
+
+	mdict = IOServiceMatching(kIOUSBDeviceClassName);
+
+	if (is_null(mdict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, mdict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	fprintf(stdout, "2. Here\n");
+
+	while ((dev = IOIteratorNext(iter))) {
+		serif->devices[index] = ALLOC(sizeof(io_service_t));
+		serif->devices[index] = &dev;
+
+		index++;
+	}
+
+	serif->total = index;
+
+	IOObjectRelease(iter);
+
+	fprintf(stdout, "3. Here\n");
+
+	return;
+
+on_error:
+	*err = 1;
+
+	return;
+}
+
+/**
+ * Get device interface.
+ */
+IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
+	IOCFPlugInInterface  **plgif = NULL;
+	IOUSBDeviceInterface **devif = NULL;
+	IOReturn result;
+	SInt32 score;
+
+	*err = 0;
+
+	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plgif, &score);
+
+	if (!(result == kIOReturnSuccess && !is_null(plgif))) {
+		goto on_error;
+	}
+
+	result = (*plgif)->QueryInterface(plgif, CFUUIDGetUUIDBytes(kIOUSBDeviceInterfaceID), (LPVOID *) &devif);
+	(*plgif)->Release(plgif);
+
+	if (!(result == kIOReturnSuccess && !is_null(devif))) {
+		goto on_error;
+	}
+
+	return devif;
 
 on_error:
 	*err = 1;
