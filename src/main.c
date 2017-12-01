@@ -15,6 +15,7 @@ int main (int argc, char **argv) {
 	struct timespec ts;
 	io_service_t dev;
 	IOUSBDeviceInterface **devif;
+	SerialDeviceInterface *serif;
 
 	vendor_id  = atoi(argv[1]);
 	product_id = atoi(argv[2]);
@@ -86,6 +87,46 @@ int main (int argc, char **argv) {
 		default:
 			fprintf(stdout, "Speed: Unknown\n");
 	}
+
+	serif = ALLOC(sizeof(SerialDeviceInterface));
+	serif->devices = ALLOC(sizeof(io_service_t *));
+
+	fprintf(stdout, "1. Here\n");
+
+	get_usb_devices(&err, serif);
+
+	if (err) {
+		fprintf(stdout, "Error: Could not get all USB devices.\n");
+
+		exit(EXIT_FAILURE);
+	}
+
+	int index = 0;
+
+	fprintf(stdout, "4. Here\n");
+
+	while (index++ < serif->total) {
+		int tpower;
+		IOUSBDeviceInterface **tdevif = get_usb_device_interface(&err, serif->devices[index]);
+
+		if (err) {
+			fprintf(stdout, "Error: Could not get single USB device interface.\n");
+
+			exit(EXIT_FAILURE);
+		}
+
+		tpower = get_bus_power(&err, tdevif);
+
+		if (err) {
+			fprintf(stdout, "Error: Could not get single USB device power.\n");
+
+			exit(EXIT_FAILURE);
+		}
+
+		fprintf(stdout, "tPower: %d\n", tpower);
+	}
+
+	return 0;
 
 	signal(SIGINT, on_signal);
 	signal(SIGHUP, on_signal);
