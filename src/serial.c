@@ -127,8 +127,6 @@ void get_usb_devices (int *err, SerialDeviceInterface *serif) {
 
 	index = 0;
 
-	fprintf(stdout, "2. Here\n");
-
 	while ((dev = IOIteratorNext(iter))) {
 		serif->devices[index] = ALLOC(sizeof(io_service_t));
 		serif->devices[index] = dev;
@@ -139,8 +137,6 @@ void get_usb_devices (int *err, SerialDeviceInterface *serif) {
 	serif->total = index;
 
 	IOObjectRelease(iter);
-
-	fprintf(stdout, "3. Here\n");
 
 	return;
 

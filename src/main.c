@@ -103,8 +103,6 @@ int main (int argc, char **argv) {
 
 	serif->devices = ALLOC(sizeof(io_service_t) * serif->total);
 
-	fprintf(stdout, "1. Here\n");
-
 	/**
 	 * Get USB devices, set serif->devices[index].
 	 */
@@ -117,8 +115,6 @@ int main (int argc, char **argv) {
 	}
 
 	index = 0;
-
-	fprintf(stdout, "4. Here\n");
 
 	while (index < serif->total) {
 		int tpower;
@@ -142,8 +138,6 @@ int main (int argc, char **argv) {
 
 		index++;
 	}
-
-	return 0;
 
 	signal(SIGINT, on_signal);
 	signal(SIGHUP, on_signal);
