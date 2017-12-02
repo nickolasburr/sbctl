@@ -62,6 +62,46 @@ on_error:
 }
 
 /**
+ * Get the number of USB devices available.
+ */
+int get_num_usb_devices (int *err) {
+	int index;
+	CFMutableDictionaryRef mdict, dict;
+	io_iterator_t iter;
+	io_service_t dev;
+	kern_return_t status;
+
+	*err = 0;
+
+	mdict = IOServiceMatching(kIOUSBDeviceClassName);
+
+	if (is_null(mdict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, mdict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((dev = IOIteratorNext(iter))) {
+		index++;
+	}
+
+	IOObjectRelease(iter);
+
+	return index;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
  * Get all USB devices accessible in IORegistry.
  */
 void get_usb_devices (int *err, SerialDeviceInterface *serif) {
@@ -91,7 +131,7 @@ void get_usb_devices (int *err, SerialDeviceInterface *serif) {
 
 	while ((dev = IOIteratorNext(iter))) {
 		serif->devices[index] = ALLOC(sizeof(io_service_t));
-		serif->devices[index] = &dev;
+		serif->devices[index] = dev;
 
 		index++;
 	}
