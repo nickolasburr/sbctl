@@ -101,12 +101,16 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	serif->devices = ALLOC(sizeof(io_service_t) * serif->total);
+	serif->devices = ALLOC(sizeof(io_service_t *));
+
+	for (index = 0; index < serif->total; index += 1) {
+		serif->devices[index] = ALLOC(sizeof(io_service_t));
+	}
 
 	/**
 	 * Get USB devices, set serif->devices[index].
 	 */
-	get_usb_devices(&err, serif);
+	get_usb_devices(&err, serif->devices);
 
 	if (err) {
 		fprintf(stdout, "Error: Could not get all USB devices.\n");
@@ -123,7 +127,7 @@ int main (int argc, char **argv) {
 		tdevif = get_usb_device_interface(&err, serif->devices[index]);
 
 		if (err) {
-			fprintf(stdout, "Error: Could not get single USB device interface.\n");
+			fprintf(stdout, "Error: Could not get next USB device interface.\n");
 
 			exit(EXIT_FAILURE);
 		}
