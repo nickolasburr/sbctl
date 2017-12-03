@@ -5,7 +5,7 @@ set -ex
 PREFIX=/usr/local
 BINDIR=$PREFIX/bin
 
-TARGET="scictl"
+TARGET="sbctl"
 MANPAGE="$TARGET.1.gz"
 MANDEST=$PREFIX/share/man/man1
 

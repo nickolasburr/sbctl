@@ -3,7 +3,7 @@
 ###
 
 CC      = gcc
-TARGET  = scictl
+TARGET  = sbctl
 INSTALL = /usr/bin/install -c
 
 prefix = /usr/local
