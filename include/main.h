@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#ifndef USB_MAIN_H
-#define USB_MAIN_H
+#ifndef SBCTL_MAIN_H
+#define SBCTL_MAIN_H
 
 #include "common.h"
 #include "assert.h"
@@ -15,4 +15,4 @@
 #include "serial.h"
 #include "signals.h"
 
-#endif /* USB_MAIN_H */
+#endif /* SBCTL_MAIN_H */

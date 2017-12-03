@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#ifndef USB_SIGNALS_H
-#define USB_SIGNALS_H
+#ifndef SBCTL_SIGNALS_H
+#define SBCTL_SIGNALS_H
 
 #include <signal.h>
 #include "common.h"
@@ -13,4 +13,4 @@
 
 void on_signal(int signal);
 
-#endif /* USB_SIGNALS_H */
+#endif /* SBCTL_SIGNALS_H */
