@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#ifndef USB_COMMON_H
-#define USB_COMMON_H
+#ifndef SBCTL_COMMON_H
+#define SBCTL_COMMON_H
 
 #include <ctype.h>
 #include <errno.h>
@@ -25,7 +25,7 @@
 #include <linux/limits.h>
 #endif
 
-#define USB_VERSION "1.0.0"
+#define SBCTL_VERSION "1.0.0"
 
 #define _GNU_SOURCE
 #define NULL_DEVICE "/dev/null"
@@ -34,4 +34,4 @@
 
 extern volatile int looping;
 
-#endif /* USB_COMMON_H */
+#endif /* SBCTL_COMMON_H */

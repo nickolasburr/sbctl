@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#ifndef USB_UTILS_H
-#define USB_UTILS_H
+#ifndef SBCTL_UTILS_H
+#define SBCTL_UTILS_H
 
 #include <dirent.h>
 #include <sys/stat.h>
@@ -53,4 +53,4 @@ int is_char(const char *);
 int is_digit(int);
 int is_numeric(char *);
 
-#endif /* USB_UTILS_H */
+#endif /* SBCTL_UTILS_H */

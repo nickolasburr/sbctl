@@ -4,8 +4,8 @@
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#ifndef USB_ARGV_H
-#define USB_ARGV_H
+#ifndef SBCTL_ARGV_H
+#define SBCTL_ARGV_H
 
 #include "common.h"
 #include "error.h"
@@ -13,4 +13,4 @@
 
 #define OPT_LSEP "--"
 
-#endif /* USB_ARGV_H */
+#endif /* SBCTL_ARGV_H */
