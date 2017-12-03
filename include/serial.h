@@ -14,7 +14,14 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
-io_service_t get_usb_device (int *, int, int);
+typedef struct {
+	io_service_t *devices;
+	int total;
+} SerialDeviceInterface;
+
+int get_num_usb_devices(int *);
+void get_usb_devices(int *, SerialDeviceInterface *);
+io_service_t get_usb_device(int *, int, int);
 IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
 long long get_bus_frame(int *, IOUSBDeviceInterface **);
 long get_bus_power(int *, IOUSBDeviceInterface **);
