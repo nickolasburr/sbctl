@@ -20,7 +20,7 @@ typedef struct {
 } SerialDeviceInterface;
 
 int get_num_usb_devices(int *);
-void get_usb_devices(int *, SerialDeviceInterface *);
+void get_usb_devices(int *, io_service_t *);
 io_service_t get_usb_device(int *, int, int);
 IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
 long long get_bus_frame(int *, IOUSBDeviceInterface **);

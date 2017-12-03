@@ -104,7 +104,7 @@ on_error:
 /**
  * Get all USB devices accessible in IORegistry.
  */
-void get_usb_devices (int *err, SerialDeviceInterface *serif) {
+void get_usb_devices (int *err, io_service_t *devices) {
 	int index;
 	CFMutableDictionaryRef mdict, dict;
 	io_iterator_t iter;
@@ -128,13 +128,10 @@ void get_usb_devices (int *err, SerialDeviceInterface *serif) {
 	index = 0;
 
 	while ((dev = IOIteratorNext(iter))) {
-		serif->devices[index] = ALLOC(sizeof(io_service_t));
-		serif->devices[index] = dev;
+		devices[index] = dev;
 
 		index++;
 	}
-
-	serif->total = index;
 
 	IOObjectRelease(iter);
 
