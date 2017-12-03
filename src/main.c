@@ -118,7 +118,9 @@ int main (int argc, char **argv) {
 
 	while (index < serif->total) {
 		int tpower;
-		IOUSBDeviceInterface **tdevif = get_usb_device_interface(&err, serif->devices[index]);
+		IOUSBDeviceInterface **tdevif;
+
+		tdevif = get_usb_device_interface(&err, serif->devices[index]);
 
 		if (err) {
 			fprintf(stdout, "Error: Could not get single USB device interface.\n");
