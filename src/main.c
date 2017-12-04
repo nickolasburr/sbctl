@@ -101,11 +101,7 @@ int main (int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	serif->devices = ALLOC(sizeof(io_service_t *));
-
-	for (index = 0; index < serif->total; index += 1) {
-		serif->devices[index] = ALLOC(sizeof(io_service_t));
-	}
+	serif->devices = ALLOC(sizeof(io_service_t *) * serif->total);
 
 	/**
 	 * Get USB devices, set serif->devices[index].
