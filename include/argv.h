@@ -11,6 +11,18 @@
 #include "error.h"
 #include "utils.h"
 
-#define OPT_LSEP "--"
+#define NUM_OPTS 2
+
+typedef struct {
+	char *value;
+	char *alias;
+	char *desc;
+	int mask;
+} option_t;
+
+static option_t options[NUM_OPTS];
+
+int get_mask_from_value(char *);
+void usage(void);
 
 #endif /* SBCTL_ARGV_H */

@@ -10,158 +10,120 @@ volatile int looping = 1;
 
 int main (int argc, char **argv) {
 	char *serial;
-	int index;
-	int err, vendor_id, product_id, power, speed;
+	int err, index, lindex, power;
 	long long frame;
 	struct timespec ts;
-	io_service_t dev;
 	IOUSBDeviceInterface **devif;
 	SerialDeviceInterface *serif;
 
-	vendor_id  = atoi(argv[1]);
-	product_id = atoi(argv[2]);
+	lindex = (argc - 1);
 
-	/**
-	 * Get USB device object.
-	 */
-	dev = get_usb_device(&err, vendor_id, product_id);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get USB device.\n");
+	if (!lindex) {
+		usage();
 
 		exit(EXIT_FAILURE);
 	}
 
 	/**
-	 * Get USB device interface.
+	 * @todo: Add option, argument validation.
 	 */
-	devif = get_usb_device_interface(&err, dev);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get USB device interface.\n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	power = get_bus_power(&err, devif);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get available bus power.\n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	fprintf(stdout, "Power: %d\n", power);
-
-	speed = get_device_speed(&err, devif);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get device speed.\n");
-
-		exit(EXIT_FAILURE);
-	}
+	char *arg = argv[lindex];
 
 	/**
-	 * Output USB device speed level.
+	 * Handle options based on bitmask.
 	 */
-	switch (speed) {
-		case kUSBDeviceSpeedLow:
-			fprintf(stdout, "Speed: Low\n");
+	switch (get_mask_from_value(arg)) {
+		/**
+		 * 1. sbctl list, ls [OPTIONS]
+		 */
+		case 0x1:
+			/**
+			 * Alloc for SerialDeviceInterface instance.
+			 */
+			serif = ALLOC(sizeof(SerialDeviceInterface));
+			serif->length = get_total_usb_devices(&err);
+
+			if (err) {
+				fprintf(stdout, "Error: Could not get total number of USB devices.\n");
+
+				exit(EXIT_FAILURE);
+			}
+
+			serif->devices = ALLOC(sizeof(io_service_t *) * serif->length);
+
+			/**
+			 * Get USB devices, set serif->devices[index].
+			 */
+			get_usb_devices(&err, serif->devices);
+
+			if (err) {
+				fprintf(stdout, "Error: Could not get all USB devices.\n");
+
+				exit(EXIT_FAILURE);
+			}
+
+			for (index = 0; index < serif->length; index += 1) {
+				devif = get_usb_device_interface(&err, serif->devices[index]);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device interface.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%2d: ", index);
+
+				serial = get_serial_number(&err, serif->devices[index]);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device serial number.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				if (is_null(serial)) {
+					serial = "Unknown";
+				}
+
+				fprintf(stdout, "Serial -> %s, ", serial);
+
+				power = get_bus_power(&err, devif);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device power.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "Power -> %dmA", power);
+
+				/**
+				 * Add trailing newline.
+				 */
+				fprintf(stdout, "\n");
+
+				(*devif)->Release(devif);
+			}
 
 			break;
-		case kUSBDeviceSpeedFull:
-			fprintf(stdout, "Speed: Full\n");
-
-			break;
-		case kUSBDeviceSpeedHigh:
-			fprintf(stdout, "Speed: High\n");
-
-			break;
-		case kUSBDeviceSpeedSuper:
-			fprintf(stdout, "Speed: Super\n");
-
-			break;
-		case kUSBDeviceSpeedSuperPlus:
-			fprintf(stdout, "Speed: Super Plus\n");
+		/**
+		 * 2. sbctl show [OPTIONS]
+		 *
+		 * @todo: Build out show functionality.
+		 */
+		case 0x2:
+			fprintf(stdout, "Information for device.\n");
 
 			break;
 		default:
-			fprintf(stdout, "Speed: Unknown\n");
+			fprintf(stdout, "Invalid option %s\n", arg);
+
+			exit(EXIT_FAILURE);
 	}
 
 	/**
-	 * Alloc for SerialDeviceInterface instance.
+	 * @todo: Add GC tasks, on_error goto.
 	 */
-	serif = ALLOC(sizeof(SerialDeviceInterface));
-	serif->total = get_num_usb_devices(&err);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get total number of USB devices.\n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	serif->devices = ALLOC(sizeof(io_service_t) * serif->total);
-
-	/**
-	 * Get USB devices, set serif->devices[index].
-	 */
-	get_usb_devices(&err, serif);
-
-	if (err) {
-		fprintf(stdout, "Error: Could not get all USB devices.\n");
-
-		exit(EXIT_FAILURE);
-	}
-
-	index = 0;
-
-	while (index < serif->total) {
-		int tpower;
-		IOUSBDeviceInterface **tdevif;
-
-		tdevif = get_usb_device_interface(&err, serif->devices[index]);
-
-		if (err) {
-			fprintf(stdout, "Error: Could not get single USB device interface.\n");
-
-			exit(EXIT_FAILURE);
-		}
-
-		tpower = get_bus_power(&err, tdevif);
-
-		if (err) {
-			fprintf(stdout, "Error: Could not get next USB device power.\n");
-
-			exit(EXIT_FAILURE);
-		}
-
-		fprintf(stdout, "tPower: %d\n", tpower);
-
-		index++;
-	}
-
-	signal(SIGINT, on_signal);
-	signal(SIGHUP, on_signal);
-
-	ts.tv_sec = 0;
-	/* 0.0025s */
-	ts.tv_nsec = 2500000L;
-
-	while (looping) {
-		frame = get_bus_frame(&err, devif);
-
-		if (err) {
-			fprintf(stdout, "Error: Could not get bus frame.\n");
-
-			exit(EXIT_FAILURE);
-		}
-
-		fprintf(stdout, "\rFrame: %lld", frame);
-		fflush(stdout);
-
-		nanosleep(&ts, NULL);
-	}
 
 	return 0;
 }
