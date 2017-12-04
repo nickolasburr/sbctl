@@ -64,7 +64,7 @@ on_error:
 /**
  * Get the number of USB devices available.
  */
-int get_num_usb_devices (int *err) {
+int get_total_usb_devices (int *err) {
 	int index;
 	CFMutableDictionaryRef mdict, dict;
 	io_iterator_t iter;
@@ -274,7 +274,8 @@ on_error:
  * @note Adapted from https://goo.gl/T9eXNQ
  */
 char *get_serial_number (int *err, io_service_t device) {
-	char serial[256], *serial_ptr;
+	char serial[256];
+	char *serial_ptr = NULL;
 	CFMutableDictionaryRef dict;
 	CFTypeRef serial_obj;
 	io_iterator_t iter;

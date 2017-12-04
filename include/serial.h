@@ -16,10 +16,10 @@
 
 typedef struct {
 	io_service_t *devices;
-	int total;
+	int length;
 } SerialDeviceInterface;
 
-int get_num_usb_devices(int *);
+int get_total_usb_devices(int *);
 void get_usb_devices(int *, io_service_t *);
 io_service_t get_usb_device(int *, int, int);
 IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
