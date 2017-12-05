@@ -11,6 +11,7 @@ volatile int looping = 1;
 int main (int argc, char **argv) {
 	char *serial;
 	int err, index, lindex, power;
+	long address;
 	long long frame;
 	struct timespec ts;
 	IOUSBDeviceInterface **devif;
@@ -25,18 +26,18 @@ int main (int argc, char **argv) {
 	}
 
 	/**
-	 * @todo: Add option, argument validation.
+	 * @todo: Add command, option, option argument[s] validation.
 	 */
 	char *arg = argv[lindex];
 
 	/**
-	 * Handle options based on bitmask.
+	 * Handle commands, options based on bitmask.
 	 */
-	switch (get_mask_from_value(arg)) {
+	switch (get_command_bitmask(arg)) {
 		/**
 		 * 1. sbctl list, ls [OPTIONS]
 		 */
-		case 0x1:
+		case MASK_CMD_LIST:
 			/**
 			 * Alloc for SerialDeviceInterface instance.
 			 */
@@ -73,7 +74,27 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%2d: ", index);
 
-				serial = get_serial_number(&err, serif->devices[index]);
+				address = get_device_address(&err, devif);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device address.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "Address -> %lu, ", address);
+
+				power = get_bus_power(&err, devif);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device power.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "Power -> %d%s, ", power, UNITS_BUS_POWER);
+
+				serial = get_device_serial_number(&err, serif->devices[index]);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device serial number.\n");
@@ -85,17 +106,7 @@ int main (int argc, char **argv) {
 					serial = "Unknown";
 				}
 
-				fprintf(stdout, "Serial -> %s, ", serial);
-
-				power = get_bus_power(&err, devif);
-
-				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device power.\n");
-
-					exit(EXIT_FAILURE);
-				}
-
-				fprintf(stdout, "Power -> %dmA", power);
+				fprintf(stdout, "Serial -> %s", serial);
 
 				/**
 				 * Add trailing newline.
@@ -107,16 +118,18 @@ int main (int argc, char **argv) {
 
 			break;
 		/**
-		 * 2. sbctl show [OPTIONS]
+		 * 2. sbctl get [OPTIONS]
 		 *
-		 * @todo: Build out show functionality.
+		 * @todo: Build out get functionality.
 		 */
-		case 0x2:
+		case MASK_CMD_GET:
 			fprintf(stdout, "Information for device.\n");
 
 			break;
 		default:
-			fprintf(stdout, "Invalid option %s\n", arg);
+			fprintf(stdout, "Invalid option %s\n\n", arg);
+
+			usage();
 
 			exit(EXIT_FAILURE);
 	}
