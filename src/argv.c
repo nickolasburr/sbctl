@@ -6,43 +6,53 @@
 
 #include "argv.h"
 
-static option_t options[] = {
+static command_t commands[] = {
 	{
 		"list",
 		"ls",
 		"List available devices.",
-		0x1,
+		MASK_CMD_LIST,
 	},
 	{
-		"show",
+		"get",
 		NULL,
-		"Show information for specific device[s].",
-		0x2
+		"Get information for specific device[s].",
+		MASK_CMD_GET,
 	}
 };
 
 /**
- * Get bitmask associated with value.
+ * Get command bitmask.
  */
-int get_mask_from_value (char *value) {
+int get_command_bitmask (char *value) {
 	int index;
 
-	for (index = 0; index < NUM_OPTS; index += 1) {
-		option_t *option = &options[index];
+	for (index = 0; index < NUM_CMDS; index += 1) {
+		command_t *command = &commands[index];
 
-		if (!compare(option->value, value)) {
-			return option->mask;
+		if (!compare(command->value, value)) {
+			return command->bitmask;
 		}
 
 		/**
-		 * Check option->alias for possible match, as well.
+		 * Check command->alias for possible match, as well.
 		 */
-		if (!is_null(option->alias) && !compare(option->alias, value)) {
-			return option->mask;
+		if (!is_null(command->alias) && !compare(command->alias, value)) {
+			return command->bitmask;
 		}
 	}
 
 	return -1;
+}
+
+/**
+ * Get option bitmask.
+ *
+ * @todo: Finish building this out.
+ */
+int get_option_bitmask (char *value) {
+	int index;
+	return 0;
 }
 
 /**
@@ -51,19 +61,32 @@ int get_mask_from_value (char *value) {
 void usage (void) {
 	int index;
 	char fvalue[36];
+	char *space = " ";
 
-	fprintf(stdout, "Usage: sbctl [OPTIONS]\n\n");
-	fprintf(stdout, "Options:\n\n");
+	fprintf(stdout, "Usage: sbctl <COMMAND> [OPTIONS]\n\n");
+	fprintf(stdout, "Commands:\n\n");
 
-	for (index = 0; index < NUM_OPTS; index += 1) {
-		option_t *option = &options[index];
+	for (index = 0; index < NUM_CMDS; index += 1) {
+		command_t *command = &commands[index];
 
 		/**
-		 * Format option->value string.
+		 * Format command->value string.
 		 */
-		copy(fvalue, option->value);
-		concat(fvalue, ",");
+		copy(fvalue, command->value);
 
-		fprintf(stdout, "%4s%-22s %s: %-24s\n", "", fvalue, option->alias, option->desc);
+		/**
+		 * If command->alias is non-null,
+		 * format fvalue to include alias.
+		 */
+		if (!is_null(command->alias)) {
+			concat(fvalue, ",");
+		} else {
+			command->alias = "";
+			space = "";
+		}
+
+		fprintf(stdout, "%4s%-3s%s%s: %-24s\n", "", fvalue, space, command->alias, command->desc);
 	}
+
+	fprintf(stdout, "\nFor a list of specific command options: sbctl <COMMAND> [-h|--help]\n");
 }
