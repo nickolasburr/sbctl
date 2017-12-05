@@ -31,6 +31,7 @@ long get_bus_power(int *, IOUSBDeviceInterface **);
 long get_device_address(int *, IOUSBDeviceInterface **);
 char *get_device_serial_number(int *, io_service_t);
 int get_device_speed(int *, IOUSBDeviceInterface **);
+char *get_device_vendor_name(int *, io_service_t);
 int reset_device(int *, IOUSBDeviceInterface **);
 
 #endif /* SBCTL_SERIAL_H */
