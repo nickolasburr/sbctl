@@ -14,20 +14,23 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
+#define UNITS_BUS_POWER "mA"
+
 typedef struct {
 	io_service_t *devices;
 	int length;
 } SerialDeviceInterface;
 
-int get_total_usb_devices(int *);
-void get_usb_devices(int *, io_service_t *);
-io_service_t get_usb_device(int *, int, int);
 IOUSBDeviceInterface **get_usb_device_interface(int *, io_service_t);
+io_service_t get_usb_device(int *, int, int);
+void get_usb_devices(int *, io_service_t *);
+int get_total_usb_devices(int *);
 long long get_bus_frame(int *, IOUSBDeviceInterface **);
+char *get_bus_id(int *, io_service_t);
 long get_bus_power(int *, IOUSBDeviceInterface **);
 long get_device_address(int *, IOUSBDeviceInterface **);
+char *get_device_serial_number(int *, io_service_t);
 int get_device_speed(int *, IOUSBDeviceInterface **);
-char *get_serial_number(int *, io_service_t);
 int reset_device(int *, IOUSBDeviceInterface **);
 
 #endif /* SBCTL_SERIAL_H */

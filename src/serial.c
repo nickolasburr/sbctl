@@ -269,11 +269,47 @@ on_error:
 }
 
 /**
- * Get device serial number.
+ * Get ID of the connected bus.
  *
- * @note Adapted from https://goo.gl/T9eXNQ
+ * @note: This does not work properly, as bus information is
+ *        opaque in newer macOS versions. Likely will discard
+ *        if a proper workaround can't be implemented.
  */
-char *get_serial_number (int *err, io_service_t device) {
+char *get_bus_id (int *err, io_service_t device) {
+	char bus[256];
+	char *bus_ptr = NULL;
+	CFMutableDictionaryRef dict;
+	CFTypeRef bus_obj;
+	io_iterator_t iter;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	bus_obj = CFDictionaryGetValue(dict, CFSTR(kUSBBusID));
+
+	if (bus_obj && CFStringGetCString((CFStringRef) bus_obj, bus, 256, CFStringGetSystemEncoding())) {
+		bus_ptr = ALLOC(sizeof(bus) + NULL_BYTE);
+		copy(bus_ptr, bus);
+	}
+
+	return bus_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device serial number.
+ */
+char *get_device_serial_number (int *err, io_service_t device) {
 	char serial[256];
 	char *serial_ptr = NULL;
 	CFMutableDictionaryRef dict;
