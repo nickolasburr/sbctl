@@ -325,11 +325,9 @@ char *get_device_serial_number (int *err, io_service_t device) {
 		goto on_error;
 	}
 
-	serial_obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey));
-
-	if (!serial_obj) {
-		serial_obj = CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
-	}
+	serial_obj = CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey))
+	           ? CFDictionaryGetValue(dict, CFSTR(kIOHIDSerialNumberKey))
+	           : CFDictionaryGetValue(dict, CFSTR(kUSBSerialNumberString));
 
 	if (serial_obj && CFStringGetCString((CFStringRef) serial_obj, serial, 256, CFStringGetSystemEncoding())) {
 		serial_ptr = ALLOC(sizeof(serial) + NULL_BYTE);
@@ -337,6 +335,40 @@ char *get_device_serial_number (int *err, io_service_t device) {
 	}
 
 	return serial_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device vendor name.
+ */
+char *get_device_vendor_name (int *err, io_service_t device) {
+	char vn[256];
+	char *vn_ptr = NULL;
+	CFMutableDictionaryRef dict;
+	CFTypeRef vn_obj;
+	io_iterator_t iter;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	vn_obj = CFDictionaryGetValue(dict, CFSTR(kUSBVendorString));
+
+	if (vn_obj && CFStringGetCString((CFStringRef) vn_obj, vn, 256, CFStringGetSystemEncoding())) {
+		vn_ptr = ALLOC(sizeof(vn) + NULL_BYTE);
+		copy(vn_ptr, vn);
+	}
+
+	return vn_ptr;
 
 on_error:
 	*err = 1;

@@ -9,7 +9,7 @@
 volatile int looping = 1;
 
 int main (int argc, char **argv) {
-	char *serial;
+	char *serial, *vendor;
 	int err, index, lindex, power;
 	long address;
 	long long frame;
@@ -106,7 +106,17 @@ int main (int argc, char **argv) {
 					serial = "Unknown";
 				}
 
-				fprintf(stdout, "Serial -> %s", serial);
+				fprintf(stdout, "Serial -> %s, ", serial);
+
+				vendor = get_device_vendor_name(&err, serif->devices[index]);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device vendor name.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "Vendor -> %s", vendor);
 
 				/**
 				 * Add trailing newline.
