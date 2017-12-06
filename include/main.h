@@ -11,6 +11,7 @@
 #include "assert.h"
 #include "except.h"
 #include "argv.h"
+#include "format.h"
 #include "mem.h"
 #include "serial.h"
 #include "signals.h"
