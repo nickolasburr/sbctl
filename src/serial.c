@@ -176,9 +176,16 @@ on_error:
 }
 
 /**
+ * Get root hub device.
+ *
+ * @todo: Build this out.
+ */
+void get_usb_root_hub_device (void) {}
+
+/**
  * Get current bus frame.
  */
-long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
+unsigned long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
 	UInt64 frame;
 	AbsoluteTime time;
 	IOReturn status;
@@ -200,9 +207,32 @@ on_error:
 }
 
 /**
+ * Get number of connected bus.
+ */
+unsigned long get_bus_number (int *err, IOUSBDeviceInterface **devif) {
+	UInt32 bus;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetLocationID(devif, &bus);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (long) bus;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
  * Get bus power (in mA) available to USB device.
  */
-long get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+unsigned long get_bus_power (int *err, IOUSBDeviceInterface **devif) {
 	UInt32 power;
 	IOReturn status;
 
@@ -225,7 +255,7 @@ on_error:
 /**
  * Get device address.
  */
-long get_device_address (int *err, IOUSBDeviceInterface **devif) {
+unsigned long get_device_address (int *err, IOUSBDeviceInterface **devif) {
 	UInt16 addr;
 	IOReturn status;
 
@@ -269,44 +299,6 @@ on_error:
 }
 
 /**
- * Get ID of the connected bus.
- *
- * @note: This does not work properly, as bus information is
- *        opaque in newer macOS versions. Likely will discard
- *        if a proper workaround can't be implemented.
- */
-char *get_bus_id (int *err, io_service_t device) {
-	char bus[256];
-	char *bus_ptr = NULL;
-	CFMutableDictionaryRef dict;
-	CFTypeRef bus_obj;
-	io_iterator_t iter;
-	kern_return_t status;
-
-	*err = 0;
-
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
-
-	if (status != KERN_SUCCESS) {
-		goto on_error;
-	}
-
-	bus_obj = CFDictionaryGetValue(dict, CFSTR(kUSBBusID));
-
-	if (bus_obj && CFStringGetCString((CFStringRef) bus_obj, bus, 256, CFStringGetSystemEncoding())) {
-		bus_ptr = ALLOC(sizeof(bus) + NULL_BYTE);
-		copy(bus_ptr, bus);
-	}
-
-	return bus_ptr;
-
-on_error:
-	*err = 1;
-
-	return NULL;
-}
-
-/**
  * Get device serial number.
  */
 char *get_device_serial_number (int *err, io_service_t device) {
@@ -335,6 +327,40 @@ char *get_device_serial_number (int *err, io_service_t device) {
 	}
 
 	return serial_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get device product name.
+ */
+char *get_device_product_name (int *err, io_service_t device) {
+	char pn[256];
+	char *pn_ptr = NULL;
+	CFMutableDictionaryRef dict;
+	CFTypeRef pn_obj;
+	io_iterator_t iter;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	pn_obj = CFDictionaryGetValue(dict, CFSTR(kUSBProductString));
+
+	if (pn_obj && CFStringGetCString((CFStringRef) pn_obj, pn, 256, CFStringGetSystemEncoding())) {
+		pn_ptr = ALLOC(sizeof(pn) + NULL_BYTE);
+		copy(pn_ptr, pn);
+	}
+
+	return pn_ptr;
 
 on_error:
 	*err = 1;
