@@ -9,10 +9,13 @@
 volatile int looping = 1;
 
 int main (int argc, char **argv) {
-	char *serial, *vendor;
+	char bus_buf[5];
+	char *serial, *product, *vendor;
+	char *lines = "---";
 	int err, index, lindex, power;
-	long address;
-	long long frame;
+	unsigned long address;
+	unsigned long bus;
+	unsigned long long frame;
 	struct timespec ts;
 	IOUSBDeviceInterface **devif;
 	SerialDeviceInterface *serif;
@@ -63,8 +66,20 @@ int main (int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			}
 
+			fprintf(stdout, "%s\n", LIST_HEADER);
+
 			for (index = 0; index < serif->length; index += 1) {
-				devif = get_usb_device_interface(&err, serif->devices[index]);
+				io_service_t device;
+
+				/**
+				 * Get device object.
+				 */
+				device = serif->devices[index];
+
+				/**
+				 * Get device interface.
+				 */
+				devif = get_usb_device_interface(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device interface.\n");
@@ -72,7 +87,23 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%2d: ", index);
+				/**
+				 * Get device bus number.
+				 */
+				bus = get_bus_number(&err, devif);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device bus number.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				/**
+				 * Format bus into hex for strtol.
+				 */
+				snprintf(bus_buf, 5, "%#lx", bus);
+
+				fprintf(stdout, "%-2s%03d", "", (int) strtol(bus_buf, NULL, 0));
 
 				address = get_device_address(&err, devif);
 
@@ -82,7 +113,7 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "Address -> %lu, ", address);
+				fprintf(stdout, "%-3s%-3lu", "", address);
 
 				power = get_bus_power(&err, devif);
 
@@ -92,9 +123,9 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "Power -> %d%s, ", power, UNITS_BUS_POWER);
+				fprintf(stdout, "%-7s%-5d", "", power);
 
-				serial = get_device_serial_number(&err, serif->devices[index]);
+				serial = get_device_serial_number(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device serial number.\n");
@@ -103,12 +134,12 @@ int main (int argc, char **argv) {
 				}
 
 				if (is_null(serial)) {
-					serial = "Unknown";
+					serial = lines;
 				}
 
-				fprintf(stdout, "Serial -> %s, ", serial);
+				fprintf(stdout, "%-8s%-5s", "", serial);
 
-				vendor = get_device_vendor_name(&err, serif->devices[index]);
+				vendor = get_device_vendor_name(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device vendor name.\n");
@@ -116,7 +147,25 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "Vendor -> %s", vendor);
+				if (is_null(vendor)) {
+					vendor = lines;
+				}
+
+				fprintf(stdout, "%-11s%-.5s", "", vendor);
+
+				product = get_device_product_name(&err, device);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next USB device product name.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				if (is_null(product)) {
+					product = lines;
+				}
+
+				fprintf(stdout, "%-6s%-5s", "", product);
 
 				/**
 				 * Add trailing newline.
