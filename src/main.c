@@ -102,8 +102,7 @@ int main (int argc, char **argv) {
 				 * Format bus into hex for strtol.
 				 */
 				snprintf(bus_buf, 5, "%#lx", bus);
-
-				fprintf(stdout, "%-2s%03d", "", (int) strtol(bus_buf, NULL, 0));
+				fprintf(stdout, "%2s%-*d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
 				address = get_device_address(&err, devif);
 
@@ -113,7 +112,7 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%-3s%-3lu", "", address);
+				fprintf(stdout, "%1s%-*lu", "", 7, address);
 
 				power = get_bus_power(&err, devif);
 
@@ -123,7 +122,7 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%-7s%-5d", "", power);
+				fprintf(stdout, "%1s%-*d", "", 4, power);
 
 				serial = get_device_serial_number(&err, device);
 
