@@ -12,6 +12,7 @@ int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial, *product, *vendor;
 	char *lines = "---";
+	char *dev_type = "usb";
 	int err, index, lindex, power;
 	unsigned long address;
 	unsigned long bus;
@@ -66,7 +67,7 @@ int main (int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			}
 
-			fprintf(stdout, "%s\n", LIST_HEADER);
+			fprintf(stdout, LIST_HEADER);
 
 			for (index = 0; index < serif->length; index += 1) {
 				io_service_t device;
@@ -98,11 +99,19 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
+				fprintf(stdout, "|");
+
 				/**
-				 * Format bus into hex for strtol.
+				 * @note: dev_type is "usb" until we add additional
+				 *        serial types (Thunderbolt, Ethernet, etc).
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, dev_type);
+
+				/**
+				 * Format locationID into hex for strtol.
 				 */
 				snprintf(bus_buf, 5, "%#lx", bus);
-				fprintf(stdout, "%2s%-*d", "", 5, (int) strtoul(bus_buf, NULL, 0));
+				fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
 				address = get_device_address(&err, devif);
 
@@ -112,7 +121,7 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%1s%-*lu", "", 7, address);
+				fprintf(stdout, "%1s%-*.2lu", "", 9, address);
 
 				power = get_bus_power(&err, devif);
 
@@ -122,7 +131,7 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%1s%-*d", "", 4, power);
+				fprintf(stdout, "%1s%-*d", "", 12, power);
 
 				serial = get_device_serial_number(&err, device);
 
@@ -136,7 +145,7 @@ int main (int argc, char **argv) {
 					serial = lines;
 				}
 
-				fprintf(stdout, "%-8s%-5s", "", serial);
+				fprintf(stdout, "%1s%-*.13s", "", 15, serial);
 
 				vendor = get_device_vendor_name(&err, device);
 
@@ -150,7 +159,7 @@ int main (int argc, char **argv) {
 					vendor = lines;
 				}
 
-				fprintf(stdout, "%-11s%-.5s", "", vendor);
+				fprintf(stdout, "%1s%-*.6s", "", 8, vendor);
 
 				product = get_device_product_name(&err, device);
 
@@ -164,7 +173,9 @@ int main (int argc, char **argv) {
 					product = lines;
 				}
 
-				fprintf(stdout, "%-6s%-5s", "", product);
+				fprintf(stdout, "%1s%-*.19s", "", 20, product);
+
+				fprintf(stdout, "|");
 
 				/**
 				 * Add trailing newline.
@@ -173,6 +184,8 @@ int main (int argc, char **argv) {
 
 				(*devif)->Release(devif);
 			}
+
+			fprintf(stdout, LIST_FOOTER);
 
 			break;
 		/**
