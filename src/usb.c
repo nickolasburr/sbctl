@@ -1,15 +1,15 @@
 /**
- * serial.c
+ * usb.c
  *
  * Copyright (C) 2017 Nickolas Burr <nickolasburr@gmail.com>
  */
 
-#include "serial.h"
+#include "usb.h"
 
 /**
  * Get device by vendor, product IDs.
  */
-io_service_t get_usb_device (int *err, int vendor_id, int product_id) {
+io_service_t USB_get_device_by_vendor_product_ids (int *err, int vendor_id, int product_id) {
 	CFMutableDictionaryRef dict;
 	CFNumberRef num_ref;
 	io_iterator_t iter;
@@ -64,7 +64,7 @@ on_error:
 /**
  * Get the number of USB devices available.
  */
-int get_total_usb_devices (int *err) {
+int USB_get_total_devices (int *err) {
 	int index;
 	CFMutableDictionaryRef mdict, dict;
 	io_iterator_t iter;
@@ -104,7 +104,7 @@ on_error:
 /**
  * Get all USB devices accessible in IORegistry.
  */
-void get_usb_devices (int *err, io_service_t *devices) {
+void USB_get_devices (int *err, io_service_t *devices) {
 	int index;
 	CFMutableDictionaryRef mdict, dict;
 	io_iterator_t iter;
@@ -146,7 +146,7 @@ on_error:
 /**
  * Get device interface.
  */
-IOUSBDeviceInterface **get_usb_device_interface (int *err, io_service_t device) {
+IOUSBDeviceInterface **USB_get_device_interface (int *err, io_service_t device) {
 	IOCFPlugInInterface  **plgif = NULL;
 	IOUSBDeviceInterface **devif = NULL;
 	IOReturn result;
@@ -176,16 +176,9 @@ on_error:
 }
 
 /**
- * Get root hub device.
- *
- * @todo: Build this out.
- */
-void get_usb_root_hub_device (void) {}
-
-/**
  * Get current bus frame.
  */
-unsigned long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
+unsigned long long USB_get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
 	UInt64 frame;
 	AbsoluteTime time;
 	IOReturn status;
@@ -198,18 +191,18 @@ unsigned long long get_bus_frame (int *err, IOUSBDeviceInterface **devif) {
 		goto on_error;
 	}
 
-	return (long long) frame;
+	return (unsigned long long) frame;
 
 on_error:
 	*err = 1;
 
-	return NULL;
+	return -1;
 }
 
 /**
- * Get number of connected bus.
+ * Get location ID of device.
  */
-unsigned long get_bus_number (int *err, IOUSBDeviceInterface **devif) {
+unsigned long USB_get_device_location_id (int *err, IOUSBDeviceInterface **devif) {
 	UInt32 bus;
 	IOReturn status;
 
@@ -221,18 +214,18 @@ unsigned long get_bus_number (int *err, IOUSBDeviceInterface **devif) {
 		goto on_error;
 	}
 
-	return (long) bus;
+	return (unsigned long) bus;
 
 on_error:
 	*err = 1;
 
-	return NULL;
+	return -1;
 }
 
 /**
  * Get bus power (in mA) available to USB device.
  */
-unsigned long get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+unsigned long USB_get_bus_power (int *err, IOUSBDeviceInterface **devif) {
 	UInt32 power;
 	IOReturn status;
 
@@ -244,18 +237,18 @@ unsigned long get_bus_power (int *err, IOUSBDeviceInterface **devif) {
 		goto on_error;
 	}
 
-	return (int) power;
+	return (unsigned long) power;
 
 on_error:
 	*err = 1;
 
-	return NULL;
+	return -1;
 }
 
 /**
  * Get device address.
  */
-unsigned long get_device_address (int *err, IOUSBDeviceInterface **devif) {
+unsigned long USB_get_device_address (int *err, IOUSBDeviceInterface **devif) {
 	UInt16 addr;
 	IOReturn status;
 
@@ -267,18 +260,18 @@ unsigned long get_device_address (int *err, IOUSBDeviceInterface **devif) {
 		goto on_error;
 	}
 
-	return (long) addr;
+	return (unsigned long) addr;
 
 on_error:
 	*err = 1;
 
-	return NULL;
+	return -1;
 }
 
 /**
  * Get device throughput speed.
  */
-int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
+int USB_get_device_speed (int *err, IOUSBDeviceInterface **devif) {
 	UInt8 speed;
 	IOReturn status;
 
@@ -295,13 +288,13 @@ int get_device_speed (int *err, IOUSBDeviceInterface **devif) {
 on_error:
 	*err = 1;
 
-	return NULL;
+	return -1;
 }
 
 /**
  * Get device serial number.
  */
-char *get_device_serial_number (int *err, io_service_t device) {
+char *USB_get_device_serial_number (int *err, io_service_t device) {
 	char serial[256];
 	char *serial_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -337,7 +330,7 @@ on_error:
 /**
  * Get device product name.
  */
-char *get_device_product_name (int *err, io_service_t device) {
+char *USB_get_device_product_name (int *err, io_service_t device) {
 	char pn[256];
 	char *pn_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -371,7 +364,7 @@ on_error:
 /**
  * Get device vendor name.
  */
-char *get_device_vendor_name (int *err, io_service_t device) {
+char *USB_get_device_vendor_name (int *err, io_service_t device) {
 	char vn[256];
 	char *vn_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -405,7 +398,7 @@ on_error:
 /**
  * Reset device.
  */
-int reset_device (int *err, IOUSBDeviceInterface **devif) {
+int USB_reset_device (int *err, IOUSBDeviceInterface **devif) {
 	IOReturn status;
 
 	*err = 0;

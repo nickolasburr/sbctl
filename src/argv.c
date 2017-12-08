@@ -6,7 +6,7 @@
 
 #include "argv.h"
 
-static command_t commands[] = {
+static Command_T commands[] = {
 	{
 		"list",
 		"ls",
@@ -24,11 +24,11 @@ static command_t commands[] = {
 /**
  * Get command bitmask.
  */
-int get_command_bitmask (char *value) {
+int ARGV_get_command_bitmask (char *value) {
 	int index;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
-		command_t *command = &commands[index];
+		Command_T *command = &commands[index];
 
 		if (!compare(command->value, value)) {
 			return command->bitmask;
@@ -50,7 +50,7 @@ int get_command_bitmask (char *value) {
  *
  * @todo: Finish building this out.
  */
-int get_option_bitmask (char *value) {
+int ARGV_get_option_bitmask (char *value) {
 	int index;
 	return 0;
 }
@@ -58,7 +58,7 @@ int get_option_bitmask (char *value) {
 /**
  * Print usage information.
  */
-void usage (void) {
+void ARGV_usage (void) {
 	int index;
 	char fvalue[36];
 	char *space = " ";
@@ -67,7 +67,7 @@ void usage (void) {
 	fprintf(stdout, "Commands:\n\n");
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
-		command_t *command = &commands[index];
+		Command_T *command = &commands[index];
 
 		/**
 		 * Format command->value string.
