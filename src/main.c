@@ -69,6 +69,9 @@ int main (int argc, char **argv) {
 
 			fprintf(stdout, LIST_HEADER);
 
+			/**
+			 * List USB devices.
+			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				io_service_t device;
 				IOUSBDeviceInterface **devif;
@@ -198,6 +201,9 @@ int main (int argc, char **argv) {
 
 			fprintf(stdout, "THUN: %d\n", thunif->length);
 
+			/**
+			 * List Thunderbolt ports.
+			 */
 			for (index = 0; index < thunif->length; index += 1) {
 				io_service_t port;
 				unsigned long adapter_type;
