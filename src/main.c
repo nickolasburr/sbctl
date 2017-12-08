@@ -18,13 +18,13 @@ int main (int argc, char **argv) {
 	unsigned long bus;
 	unsigned long long frame;
 	struct timespec ts;
-	IOUSBDeviceInterface **devif;
-	SerialDeviceInterface *serif;
+	USB_T *usbif;
+	Thun_T *thunif;
 
 	lindex = (argc - 1);
 
 	if (!lindex) {
-		usage();
+		ARGV_usage();
 
 		exit(EXIT_FAILURE);
 	}
@@ -37,16 +37,16 @@ int main (int argc, char **argv) {
 	/**
 	 * Handle commands, options based on bitmask.
 	 */
-	switch (get_command_bitmask(arg)) {
+	switch (ARGV_get_command_bitmask(arg)) {
 		/**
 		 * 1. sbctl list, ls [OPTIONS]
 		 */
 		case MASK_CMD_LIST:
 			/**
-			 * Alloc for SerialDeviceInterface instance.
+			 * Alloc for USB_T instance.
 			 */
-			serif = ALLOC(sizeof(SerialDeviceInterface));
-			serif->length = get_total_usb_devices(&err);
+			usbif = ALLOC(sizeof(USB_T));
+			usbif->length = USB_get_total_devices(&err);
 
 			if (err) {
 				fprintf(stdout, "Error: Could not get total number of USB devices.\n");
@@ -54,12 +54,12 @@ int main (int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			}
 
-			serif->devices = ALLOC(sizeof(io_service_t *) * serif->length);
+			usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
 
 			/**
-			 * Get USB devices, set serif->devices[index].
+			 * Get USB devices, set usbif->devices[index].
 			 */
-			get_usb_devices(&err, serif->devices);
+			USB_get_devices(&err, usbif->devices);
 
 			if (err) {
 				fprintf(stdout, "Error: Could not get all USB devices.\n");
@@ -69,18 +69,19 @@ int main (int argc, char **argv) {
 
 			fprintf(stdout, LIST_HEADER);
 
-			for (index = 0; index < serif->length; index += 1) {
+			for (index = 0; index < usbif->length; index += 1) {
 				io_service_t device;
+				IOUSBDeviceInterface **devif;
 
 				/**
 				 * Get device object.
 				 */
-				device = serif->devices[index];
+				device = usbif->devices[index];
 
 				/**
 				 * Get device interface.
 				 */
-				devif = get_usb_device_interface(&err, device);
+				devif = USB_get_device_interface(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device interface.\n");
@@ -89,12 +90,12 @@ int main (int argc, char **argv) {
 				}
 
 				/**
-				 * Get device bus number.
+				 * Get device locationID for bus number.
 				 */
-				bus = get_bus_number(&err, devif);
+				bus = USB_get_device_location_id(&err, devif);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device bus number.\n");
+					fprintf(stdout, "Error: Could not get next USB device location ID.\n");
 
 					exit(EXIT_FAILURE);
 				}
@@ -113,7 +114,7 @@ int main (int argc, char **argv) {
 				snprintf(bus_buf, 5, "%#lx", bus);
 				fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
-				address = get_device_address(&err, devif);
+				address = USB_get_device_address(&err, devif);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device address.\n");
@@ -123,7 +124,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.2lu", "", 9, address);
 
-				power = get_bus_power(&err, devif);
+				power = USB_get_bus_power(&err, devif);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device power.\n");
@@ -133,7 +134,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*d", "", 12, power);
 
-				serial = get_device_serial_number(&err, device);
+				serial = USB_get_device_serial_number(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device serial number.\n");
@@ -147,7 +148,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.13s", "", 15, serial);
 
-				vendor = get_device_vendor_name(&err, device);
+				vendor = USB_get_device_vendor_name(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device vendor name.\n");
@@ -161,7 +162,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.6s", "", 8, vendor);
 
-				product = get_device_product_name(&err, device);
+				product = USB_get_device_product_name(&err, device);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next USB device product name.\n");
@@ -185,6 +186,46 @@ int main (int argc, char **argv) {
 				(*devif)->Release(devif);
 			}
 
+			thunif = ALLOC(sizeof(Thun_T));
+			thunif->length = THUN_get_total_ports(&err);
+
+			thunif->devices = ALLOC(sizeof(io_service_t *) * thunif->length);
+
+			/**
+			 * Get Thunderbolt ports.
+			 */
+			THUN_get_ports(&err, thunif->devices);
+
+			fprintf(stdout, "THUN: %d\n", thunif->length);
+
+			for (index = 0; index < thunif->length; index += 1) {
+				io_service_t port;
+				unsigned long adapter_type;
+
+				/**
+				 * Get port object.
+				 */
+				port = thunif->devices[index];
+
+				adapter_type = THUN_get_adapter_type(&err, port);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next Thunderbolt port adapter type.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				/**
+				 * Format locationID into hex for strtol.
+				 */
+				fprintf(stdout, "%lu", adapter_type);
+
+				/**
+				 * Add trailing newline.
+				 */
+				fprintf(stdout, "\n");
+			}
+
 			fprintf(stdout, LIST_FOOTER);
 
 			break;
@@ -200,7 +241,7 @@ int main (int argc, char **argv) {
 		default:
 			fprintf(stdout, "Invalid option %s\n\n", arg);
 
-			usage();
+			ARGV_usage();
 
 			exit(EXIT_FAILURE);
 	}

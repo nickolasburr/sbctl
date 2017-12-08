@@ -14,6 +14,8 @@
 #include "format.h"
 #include "mem.h"
 #include "serial.h"
+#include "usb.h"
+#include "thun.h"
 #include "signals.h"
 
 #endif /* SBCTL_MAIN_H */
