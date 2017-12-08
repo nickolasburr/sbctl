@@ -12,7 +12,8 @@ int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial, *product, *vendor;
 	char *lines = "---";
-	char *dev_type = "usb";
+	char *usb_type = "usb";
+	char *thun_type = "thun";
 	int err, index, lindex, power;
 	unsigned long address;
 	unsigned long bus;
@@ -69,6 +70,9 @@ int main (int argc, char **argv) {
 
 			fprintf(stdout, LIST_HEADER);
 
+			/**
+			 * List USB devices.
+			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				io_service_t device;
 				IOUSBDeviceInterface **devif;
@@ -89,6 +93,13 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
+				fprintf(stdout, "|");
+
+				/**
+				 * USB device type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_type);
+
 				/**
 				 * Get device locationID for bus number.
 				 */
@@ -99,14 +110,6 @@ int main (int argc, char **argv) {
 
 					exit(EXIT_FAILURE);
 				}
-
-				fprintf(stdout, "|");
-
-				/**
-				 * @note: dev_type is "usb" until we add additional
-				 *        serial types (Thunderbolt, Ethernet, etc).
-				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, dev_type);
 
 				/**
 				 * Format locationID into hex for strtol.
@@ -196,8 +199,9 @@ int main (int argc, char **argv) {
 			 */
 			THUN_get_ports(&err, thunif->devices);
 
-			fprintf(stdout, "THUN: %d\n", thunif->length);
-
+			/**
+			 * List Thunderbolt ports.
+			 */
 			for (index = 0; index < thunif->length; index += 1) {
 				io_service_t port;
 				unsigned long adapter_type;
@@ -206,6 +210,13 @@ int main (int argc, char **argv) {
 				 * Get port object.
 				 */
 				port = thunif->devices[index];
+
+				fprintf(stdout, "|");
+
+				/**
+				 * Thunderbolt port type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
 
 				adapter_type = THUN_get_adapter_type(&err, port);
 
@@ -216,9 +227,9 @@ int main (int argc, char **argv) {
 				}
 
 				/**
-				 * Format locationID into hex for strtol.
+				 * Adapter type.
 				 */
-				fprintf(stdout, "%lu", adapter_type);
+				fprintf(stdout, "%1s%-*.3lu", "", 5, adapter_type);
 
 				/**
 				 * Add trailing newline.
