@@ -96,6 +96,7 @@ unsigned long THUN_get_adapter_type (int *err, io_service_t port) {
 	char adapter[256];
 	char *adapter_ptr = NULL;
 	CFMutableDictionaryRef dict;
+	CFTypeRef adapter_obj;
 	CFNumberRef adapter_num;
 	io_iterator_t iter;
 	kern_return_t status;
@@ -108,7 +109,11 @@ unsigned long THUN_get_adapter_type (int *err, io_service_t port) {
 		goto on_error;
 	}
 
-	adapter_num = CFDictionaryGetValue(dict, CFSTR("Adapter Type"));
+	adapter_obj = CFDictionaryGetValue(dict, CFSTR("Adapter Type"));
+
+	if (!(adapter_obj && CFNumberGetValue((CFNumberRef) adapter_obj, kCFNumberLongType, &adapter_num))) {
+		goto on_error;
+	}
 
 	return (unsigned long) adapter_num;
 
