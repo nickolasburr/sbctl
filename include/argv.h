@@ -27,20 +27,20 @@ typedef struct {
 	char *alias;
 	char *desc;
 	int bitmask;
-} option_t;
+} Option_T;
 
 typedef struct {
 	char *value;
 	char *alias;
 	char *desc;
 	int bitmask;
-	option_t *options;
-} command_t;
+	Option_T *options;
+} Command_T;
 
-static command_t commands[NUM_CMDS];
+static Command_T commands[NUM_CMDS];
 
-int get_command_bitmask(char *);
-int get_option_bitmask(char *);
-void usage(void);
+int ARGV_get_command_bitmask(char *);
+int ARGV_get_option_bitmask(char *);
+void ARGV_usage(void);
 
 #endif /* SBCTL_ARGV_H */
