@@ -12,7 +12,8 @@ int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial, *product, *vendor;
 	char *lines = "---";
-	char *dev_type = "usb";
+	char *usb_type = "usb";
+	char *thun_type = "thun";
 	int err, index, lindex, power;
 	unsigned long address;
 	unsigned long bus;
@@ -92,6 +93,13 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
+				fprintf(stdout, "|");
+
+				/**
+				 * USB device type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_type);
+
 				/**
 				 * Get device locationID for bus number.
 				 */
@@ -102,14 +110,6 @@ int main (int argc, char **argv) {
 
 					exit(EXIT_FAILURE);
 				}
-
-				fprintf(stdout, "|");
-
-				/**
-				 * @note: dev_type is "usb" until we add additional
-				 *        serial types (Thunderbolt, Ethernet, etc).
-				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, dev_type);
 
 				/**
 				 * Format locationID into hex for strtol.
@@ -199,8 +199,6 @@ int main (int argc, char **argv) {
 			 */
 			THUN_get_ports(&err, thunif->devices);
 
-			fprintf(stdout, "THUN: %d\n", thunif->length);
-
 			/**
 			 * List Thunderbolt ports.
 			 */
@@ -221,10 +219,14 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
+				fprintf(stdout, "|");
+
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
+
 				/**
-				 * Format locationID into hex for strtol.
+				 * Adapter type.
 				 */
-				fprintf(stdout, "%lu", adapter_type);
+				fprintf(stdout, "%1s%-*.3lu", "", 5, adapter_type);
 
 				/**
 				 * Add trailing newline.
