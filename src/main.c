@@ -211,6 +211,13 @@ int main (int argc, char **argv) {
 				 */
 				port = thunif->devices[index];
 
+				fprintf(stdout, "|");
+
+				/**
+				 * Thunderbolt port type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
+
 				adapter_type = THUN_get_adapter_type(&err, port);
 
 				if (err) {
@@ -218,10 +225,6 @@ int main (int argc, char **argv) {
 
 					exit(EXIT_FAILURE);
 				}
-
-				fprintf(stdout, "|");
-
-				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
 
 				/**
 				 * Adapter type.
