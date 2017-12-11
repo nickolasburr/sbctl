@@ -7,50 +7,15 @@
 #include "thun.h"
 
 /**
- * Get the number of Thunderbolt ports.
+ *
+ * Thunderbolt ports.
+ *
  */
-int THUN_get_total_ports (int *err) {
-	int index;
-	CFMutableDictionaryRef dict;
-	io_iterator_t iter;
-	io_service_t device;
-	kern_return_t status;
-
-	*err = 0;
-
-	dict = IOServiceMatching("IOThunderboltPort");
-
-	if (is_null(dict)) {
-		goto on_error;
-	}
-
-	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
-
-	if (status != KERN_SUCCESS) {
-		goto on_error;
-	}
-
-	index = 0;
-
-	while ((device = IOIteratorNext(iter))) {
-		index++;
-	}
-
-	IOObjectRelease(iter);
-
-	return index;
-
-on_error:
-	*err = 1;
-
-	return -1;
-}
-
 
 /**
- * Get all port interfaces connecting devices downstream via Thunderbolt.
+ * Get total number of PCI Thunderbolt ports.
  */
-void THUN_get_ports (int *err, io_service_t *devices) {
+int THUN_get_total_ports (int *err) {
 	int index;
 	CFMutableDictionaryRef dict;
 	io_iterator_t iter;
@@ -74,7 +39,49 @@ void THUN_get_ports (int *err, io_service_t *devices) {
 	index = 0;
 
 	while ((port = IOIteratorNext(iter))) {
-		devices[index] = port;
+		index++;
+
+		IOObjectRelease(port);
+	}
+
+	IOObjectRelease(iter);
+
+	return index;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get all Thunderbolt ports.
+ */
+void THUN_get_ports (int *err, Port_T *ports) {
+	int index;
+	CFMutableDictionaryRef dict;
+	io_iterator_t iter;
+	io_service_t port;
+	kern_return_t status;
+
+	*err = 0;
+
+	dict = IOServiceMatching(kIOThunderboltPortClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((port = IOIteratorNext(iter))) {
+		ports->ports[index] = port;
 
 		index++;
 	}
@@ -90,14 +97,12 @@ on_error:
 }
 
 /**
- * Get Thunderbolt port adapter type.
+ * Get port number.
  */
-unsigned long THUN_get_adapter_type (int *err, io_service_t port) {
-	char adapter[256];
-	char *adapter_ptr = NULL;
+unsigned long THUN_get_port_number (int *err, io_service_t port) {
+	unsigned long port_num;
+	CFNumberRef pn_obj;
 	CFMutableDictionaryRef dict;
-	CFTypeRef adapter_obj;
-	CFNumberRef adapter_num;
 	io_iterator_t iter;
 	kern_return_t status;
 
@@ -109,13 +114,16 @@ unsigned long THUN_get_adapter_type (int *err, io_service_t port) {
 		goto on_error;
 	}
 
-	adapter_obj = CFDictionaryGetValue(dict, CFSTR("Adapter Type"));
+	pn_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortNumberKey));
 
-	if (!(adapter_obj && CFNumberGetValue((CFNumberRef) adapter_obj, kCFNumberLongType, &adapter_num))) {
+	if (!(pn_obj && CFNumberGetValue(pn_obj, kCFNumberLongType, &port_num))) {
 		goto on_error;
 	}
 
-	return (unsigned long) adapter_num;
+	CFRelease(pn_obj);
+	IOObjectRelease(iter);
+
+	return port_num;
 
 on_error:
 	*err = 1;

@@ -14,11 +14,14 @@ int main (int argc, char **argv) {
 	char *lines = "---";
 	char *usb_type = "usb";
 	char *thun_type = "thun";
+	char *usb_speed_spec, *thun_speed_spec;
 	int err, index, lindex, power;
-	unsigned long address;
-	unsigned long bus;
+	int usb_speed, thun_speed;
+	unsigned long address, bus;
+	unsigned long usb_port, thun_port;
 	unsigned long long frame;
-	struct timespec ts;
+	io_service_t device, port;
+	IOUSBDeviceInterface **devif;
 	USB_T *usbif;
 	Thun_T *thunif;
 
@@ -50,7 +53,7 @@ int main (int argc, char **argv) {
 			usbif->length = USB_get_total_devices(&err);
 
 			if (err) {
-				fprintf(stdout, "Error: Could not get total number of USB devices.\n");
+				fprintf(stderr, "Error: Could not get total number of USB devices.\n");
 
 				exit(EXIT_FAILURE);
 			}
@@ -63,7 +66,7 @@ int main (int argc, char **argv) {
 			USB_get_devices(&err, usbif->devices);
 
 			if (err) {
-				fprintf(stdout, "Error: Could not get all USB devices.\n");
+				fprintf(stderr, "Error: Could not get all USB devices.\n");
 
 				exit(EXIT_FAILURE);
 			}
@@ -74,9 +77,6 @@ int main (int argc, char **argv) {
 			 * List USB devices.
 			 */
 			for (index = 0; index < usbif->length; index += 1) {
-				io_service_t device;
-				IOUSBDeviceInterface **devif;
-
 				/**
 				 * Get device object.
 				 */
@@ -88,7 +88,7 @@ int main (int argc, char **argv) {
 				devif = USB_get_device_interface(&err, device);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device interface.\n");
+					fprintf(stderr, "Error: Could not get next USB device interface.\n");
 
 					exit(EXIT_FAILURE);
 				}
@@ -96,7 +96,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "|");
 
 				/**
-				 * USB device type.
+				 * ex., Type: USB
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_type);
 
@@ -106,41 +106,94 @@ int main (int argc, char **argv) {
 				bus = USB_get_device_location_id(&err, devif);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device location ID.\n");
+					fprintf(stderr, "Error: Could not get next USB device location ID.\n");
 
 					exit(EXIT_FAILURE);
 				}
 
 				/**
-				 * Format locationID into hex for strtol.
+				 * Format locationID into hex for strtoul.
 				 */
 				snprintf(bus_buf, 5, "%#lx", bus);
 				fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
+				/**
+				 * Get device assigned address.
+				 */
 				address = USB_get_device_address(&err, devif);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device address.\n");
+					fprintf(stderr, "Error: Could not get next USB device address.\n");
 
 					exit(EXIT_FAILURE);
 				}
 
+				/**
+				 * ex., Address: 01
+				 */
 				fprintf(stdout, "%1s%-*.2lu", "", 9, address);
 
+				/**
+				 * Get device port number.
+				 */
+				usb_port = USB_get_device_port_number(&err, device);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next USB port number.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				/**
+				 * ex., Port: 02
+				 */
+				if (!is_error((int) usb_port, -1)) {
+					fprintf(stdout, "%1s%-*.2lu", "", 6, usb_port);
+				} else {
+					fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+				}
+
+				/**
+				 * Get bus power available to device.
+				 */
 				power = USB_get_bus_power(&err, devif);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device power.\n");
+					fprintf(stderr, "Error: Could not get next USB device power.\n");
 
 					exit(EXIT_FAILURE);
 				}
 
+				/**
+				 * ex., Power: 250
+				 */
 				fprintf(stdout, "%1s%-*d", "", 12, power);
+
+				usb_speed = USB_get_device_speed(&err, devif);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next USB device speed class.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				usb_speed_spec = USB_get_device_speed_as_spec(&err, usb_speed);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next USB device speed specification.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				/**
+				 * ex., Speed: 480
+				 */
+				fprintf(stdout, "%1s%-*.5s", "", 14, usb_speed_spec);
 
 				serial = USB_get_device_serial_number(&err, device);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device serial number.\n");
+					fprintf(stderr, "Error: Could not get next USB device serial number.\n");
 
 					exit(EXIT_FAILURE);
 				}
@@ -154,7 +207,7 @@ int main (int argc, char **argv) {
 				vendor = USB_get_device_vendor_name(&err, device);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device vendor name.\n");
+					fprintf(stderr, "Error: Could not get next USB device vendor name.\n");
 
 					exit(EXIT_FAILURE);
 				}
@@ -168,7 +221,7 @@ int main (int argc, char **argv) {
 				product = USB_get_device_product_name(&err, device);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next USB device product name.\n");
+					fprintf(stderr, "Error: Could not get next USB device product name.\n");
 
 					exit(EXIT_FAILURE);
 				}
@@ -189,47 +242,71 @@ int main (int argc, char **argv) {
 				(*devif)->Release(devif);
 			}
 
-			thunif = ALLOC(sizeof(Thun_T));
-			thunif->length = THUN_get_total_ports(&err);
+			Port_T *ports;
 
-			thunif->devices = ALLOC(sizeof(io_service_t *) * thunif->length);
+			ports = ALLOC(sizeof(Port_T));
+			ports->length = THUN_get_total_ports(&err);
+
+			if (err) {
+				fprintf(stderr, "Error: Could not get total number of Thunderbolt ports.\n");
+
+				exit(EXIT_FAILURE);
+			}
+
+			ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
 
 			/**
 			 * Get Thunderbolt ports.
 			 */
-			THUN_get_ports(&err, thunif->devices);
+			THUN_get_ports(&err, ports);
 
 			/**
-			 * List Thunderbolt ports.
+			 * List PCI entities using Thunderbolt.
 			 */
-			for (index = 0; index < thunif->length; index += 1) {
-				io_service_t port;
-				unsigned long adapter_type;
-
+			for (index = 0; index < ports->length; index += 1) {
 				/**
 				 * Get port object.
 				 */
-				port = thunif->devices[index];
+				port = ports->ports[index];
 
 				fprintf(stdout, "|");
 
 				/**
-				 * Thunderbolt port type.
+				 * Thunderbolt type.
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
 
-				adapter_type = THUN_get_adapter_type(&err, port);
+				/**
+				 * Placeholder for Bus, Address columns.
+				 */
+				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
+
+				thun_port = THUN_get_port_number(&err, port);
 
 				if (err) {
-					fprintf(stdout, "Error: Could not get next Thunderbolt port adapter type.\n");
+					fprintf(stderr, "Error: Could not get next Thunderbolt port number.\n");
 
 					exit(EXIT_FAILURE);
 				}
 
 				/**
-				 * Adapter type.
+				 * Port number.
 				 */
-				fprintf(stdout, "%1s%-*.3lu", "", 5, adapter_type);
+				fprintf(stdout, "%1s%-*.2lu", "", 6, thun_port);
+
+				/**
+				 * Placeholders for Power, Speed, Serial Number,
+				 * Vendor, and Product Description.
+				 */
+				fprintf(stdout, "%1s%-*s", "", 12, lines);
+				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
+				fprintf(stdout, "%1s%-*.19s", "", 20, lines);
+
+
+				fprintf(stdout, "|");
 
 				/**
 				 * Add trailing newline.
@@ -250,7 +327,7 @@ int main (int argc, char **argv) {
 
 			break;
 		default:
-			fprintf(stdout, "Invalid option %s\n\n", arg);
+			fprintf(stderr, "Invalid option %s\n\n", arg);
 
 			ARGV_usage();
 
