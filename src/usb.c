@@ -292,6 +292,43 @@ on_error:
 }
 
 /**
+ * Get projected device throughput speed as string,
+ * which contains max TP, as outlined in USB specs.
+ */
+char *USB_get_device_speed_as_spec (int *err, int speed) {
+	char *speed_spec = NULL;
+
+	*err = 0;
+
+	switch (speed) {
+		case kUSBDeviceSpeedLow:
+			speed_spec = USB_LOW_SPEED;
+
+			break;
+		case kUSBDeviceSpeedFull:
+			speed_spec = USB_FULL_SPEED;
+
+			break;
+		case kUSBDeviceSpeedHigh:
+			speed_spec = USB_HIGH_SPEED;
+
+			break;
+		case kUSBDeviceSpeedSuper:
+			speed_spec = USB_SUPER_SPEED;
+
+			break;
+		case kUSBDeviceSpeedSuperPlus:
+			speed_spec = USB_SUPER_SPEED_PLUS;
+
+			break;
+		default:
+			*err = 1;
+	}
+
+	return speed_spec;
+}
+
+/**
  * Get device serial number.
  */
 char *USB_get_device_serial_number (int *err, io_service_t device) {
@@ -325,6 +362,38 @@ on_error:
 	*err = 1;
 
 	return NULL;
+}
+
+/**
+ * Get device port number.
+ */
+unsigned long USB_get_device_port_number (int *err, io_service_t device) {
+	unsigned long port_num;
+	CFMutableDictionaryRef dict;
+	CFNumberRef pn_obj;
+	io_iterator_t iter;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	pn_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kUSBPortNumberKey));
+
+	if (!(pn_obj && CFNumberGetValue(pn_obj, kCFNumberLongType, &port_num))) {
+		port_num = -1;
+	}
+
+	return port_num;
+
+on_error:
+	*err = 1;
+
+	return -1;
 }
 
 /**
