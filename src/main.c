@@ -12,12 +12,16 @@ int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial, *product, *vendor;
 	char *lines = "---";
+	char *pci_spec = "pci";
+	char *pci_type = "pci";
+	char *usb_spec = "usb";
 	char *usb_type = "usb";
+	char *thun_spec = "pci";
 	char *thun_type = "thun";
 	char *usb_speed_spec, *thun_speed_spec;
 	int err, index, lindex, power;
 	int usb_speed, thun_speed;
-	unsigned long address, bus;
+	unsigned long address, bus, dev_id;
 	unsigned long usb_port, thun_port;
 	unsigned long long frame;
 	io_service_t device, port;
@@ -94,6 +98,11 @@ int main (int argc, char **argv) {
 				}
 
 				fprintf(stdout, "|");
+
+				/**
+				 * USB spec.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
 
 				/**
 				 * ex., Type: USB
@@ -202,7 +211,23 @@ int main (int argc, char **argv) {
 					serial = lines;
 				}
 
+				/**
+				 * ex., Serial: 00000000
+				 */
 				fprintf(stdout, "%1s%-*.13s", "", 15, serial);
+
+				dev_id = USB_get_device_id(&err, devif);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next USB device ID.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				/**
+				 * ex., Device ID: 16
+				 */
+				fprintf(stdout, "%1s%-*.2lu", "", 12, dev_id);
 
 				vendor = USB_get_device_vendor_name(&err, device);
 
@@ -216,6 +241,9 @@ int main (int argc, char **argv) {
 					vendor = lines;
 				}
 
+				/**
+				 * ex., Vendor: Apple
+				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, vendor);
 
 				product = USB_get_device_product_name(&err, device);
@@ -272,8 +300,9 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "|");
 
 				/**
-				 * Thunderbolt type.
+				 * Thunderbolt spec, type.
 				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
 
 				/**
@@ -296,12 +325,25 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.2lu", "", 6, thun_port);
 
 				/**
-				 * Placeholders for Power, Speed, Serial Number,
-				 * Vendor, and Product Description.
+				 * Placeholders for Power, Speed, and Serial Number.
 				 */
 				fprintf(stdout, "%1s%-*s", "", 12, lines);
 				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+
+				dev_id = THUN_get_port_device_id(&err, port);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt port device ID.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.2lu", "", 12, dev_id);
+
+				/**
+				 * Placeholders for Vendor and Product Description.
+				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 				fprintf(stdout, "%1s%-*.19s", "", 20, lines);
 
