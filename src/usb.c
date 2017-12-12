@@ -203,18 +203,43 @@ on_error:
  * Get location ID of device.
  */
 unsigned long USB_get_device_location_id (int *err, IOUSBDeviceInterface **devif) {
-	UInt32 bus;
+	UInt32 lid;
 	IOReturn status;
 
 	*err = 0;
 
-	status = (*devif)->GetLocationID(devif, &bus);
+	status = (*devif)->GetLocationID(devif, &lid);
 
 	if (status != kIOReturnSuccess) {
 		goto on_error;
 	}
 
-	return (unsigned long) bus;
+	return (unsigned long) lid;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get device ID.
+ *
+ * @note: The device ID is specific to sbctl registry.
+ */
+unsigned long USB_get_device_id (int *err, IOUSBDeviceInterface **devif) {
+	UInt32 lid;
+	IOReturn status;
+
+	*err = 0;
+
+	status = (*devif)->GetLocationID(devif, &lid);
+
+	if (status != kIOReturnSuccess) {
+		goto on_error;
+	}
+
+	return (((unsigned long) lid >> 8) & 0xFF);
 
 on_error:
 	*err = 1;

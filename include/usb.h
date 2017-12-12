@@ -48,6 +48,7 @@ int USB_get_total_devices(int *);
 unsigned long long USB_get_bus_frame(int *, IOUSBDeviceInterface **);
 unsigned long USB_get_bus_power(int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_address(int *, IOUSBDeviceInterface **);
+unsigned long USB_get_device_id (int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_location_id(int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_port_number(int *, io_service_t);
 char *USB_get_device_product_name(int *, io_service_t);
