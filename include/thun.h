@@ -10,25 +10,12 @@
 #include "common.h"
 #include "serial.h"
 
-#ifndef kIOThunderboltPortClassName
 #define kIOThunderboltPortClassName "IOThunderboltPort"
-#endif
-
-#ifndef kIOThunderboltPortNumberKey
+#define kIOThunderboltPortDeviceIDKey "Device ID"
 #define kIOThunderboltPortNumberKey "Port Number"
-#endif
-
-#ifndef kIOThunderboltSwitchType1ClassName
 #define kIOThunderboltSwitchType1ClassName "IOThunderboltSwitchType1"
-#endif
-
-#ifndef kIOThunderboltSwitchType2ClassName
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
-#endif
-
-#ifndef kIOPCITunnelledKey
 #define kIOPCITunnelledKey "IOPCITunnelled"
-#endif
 
 typedef struct Bridge_T Bridge_T;
 typedef struct Device_T Device_T;
@@ -72,13 +59,29 @@ struct Thun_T {
 	int length;
 };
 
-size_t THUN_get_total_all_services(int *);
+/**
+ * All PCI Thunderbolt services.
+ */
+int THUN_get_total_all_services(int *);
 void THUN_get_all_services(int *, Service_T *);
 
+/**
+ * PCI-PCI Thunderbolt bridges.
+ */
+int THUN_get_total_bridges(int *);
+void THUN_get_bridges(int *, Bridge_T *);
+
+/**
+ * Thunderbolt ports.
+ */
 int THUN_get_total_ports(int *);
 void THUN_get_ports(int *, Port_T *);
 unsigned long THUN_get_port_number(int *, io_service_t);
+unsigned long THUN_get_port_device_id(int *, io_service_t);
 
+/**
+ * Thunderbolt switches (built-in and external).
+ */
 int THUN_get_total_all_switches(int *);
 void THUN_get_all_switches(int *, Switch_T *);
 
