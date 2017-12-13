@@ -138,7 +138,6 @@ unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
 	unsigned long dev_id;
 	CFNumberRef di_obj;
 	CFMutableDictionaryRef dict;
-	io_iterator_t iter;
 	kern_return_t status;
 
 	*err = 0;
@@ -156,7 +155,6 @@ unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
 	}
 
 	CFRelease(di_obj);
-	IOObjectRelease(iter);
 
 	return (((unsigned long) dev_id >> 8) & 0xFF);
 
@@ -164,4 +162,139 @@ on_error:
 	*err = 1;
 
 	return -1;
+}
+
+/**
+ * Get port description.
+ */
+char *THUN_get_port_description (int *err, io_service_t port) {
+	char desc_buf[256];
+	char *desc_ptr = NULL;
+	CFTypeRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(port, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortDescriptionKey));
+
+	if (cf_obj && CFStringGetCString(cf_obj, desc_buf, 256, CFStringGetSystemEncoding())) {
+		desc_ptr = ALLOC(sizeof(desc_buf) + NULL_BYTE);
+		copy(desc_ptr, desc_buf);
+	}
+
+	CFRelease(cf_obj);
+
+	return desc_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ *
+ * Thunderbolt bridges.
+ *
+ */
+
+/**
+ * Get total number of PCI-PCI Thunderbolt bridges.
+ */
+int THUN_get_total_bridges (int *err) {
+	int index;
+	CFMutableDictionaryRef dict;
+	io_iterator_t iter;
+	io_service_t bridge;
+	kern_return_t status;
+
+	*err = 0;
+
+	dict = IOServiceMatching(kIOPCI2PCIBridgeClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	/**
+	 * We need to match against our IOPCITunnelled key.
+	 */
+	CFDictionarySetValue(dict, CFSTR(kIOPCITunnelledKey), kCFBooleanTrue);
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((bridge = IOIteratorNext(iter))) {
+		index++;
+
+		IOObjectRelease(bridge);
+	}
+
+	IOObjectRelease(iter);
+
+	return index;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get all PCI-PCI Thunderbolt bridges.
+ */
+void THUN_get_bridges (int *err, Bridge_T *bridges) {
+	int index;
+	CFMutableDictionaryRef dict;
+	io_iterator_t iter;
+	io_service_t bridge;
+	kern_return_t status;
+
+	*err = 0;
+
+	dict = IOServiceMatching(kIOPCI2PCIBridgeClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	/**
+	 * We need to match against our IOPCITunnelled key.
+	 */
+	CFDictionarySetValue(dict, CFSTR(kIOPCITunnelledKey), kCFBooleanTrue);
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((bridge = IOIteratorNext(iter))) {
+		bridges->bridges[index] = bridge;
+
+		index++;
+	}
+
+	IOObjectRelease(iter);
+
+	return;
+
+on_error:
+	*err = 1;
+
+	return;
 }

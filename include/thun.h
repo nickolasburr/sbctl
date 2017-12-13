@@ -10,8 +10,11 @@
 #include "common.h"
 #include "serial.h"
 
+#define kIOPCITunnelledKey "IOPCITunnelled"
+#define kIOPCI2PCIBridgeClassName "IOPCI2PCIBridge"
 #define kIOThunderboltPortClassName "IOThunderboltPort"
 #define kIOThunderboltPortDeviceIDKey "Device ID"
+#define kIOThunderboltPortDescriptionKey "Description"
 #define kIOThunderboltPortNumberKey "Port Number"
 #define kIOThunderboltSwitchType1ClassName "IOThunderboltSwitchType1"
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
@@ -78,6 +81,7 @@ int THUN_get_total_ports(int *);
 void THUN_get_ports(int *, Port_T *);
 unsigned long THUN_get_port_number(int *, io_service_t);
 unsigned long THUN_get_port_device_id(int *, io_service_t);
+char *THUN_get_port_description(int *, io_service_t);
 
 /**
  * Thunderbolt switches (built-in and external).
