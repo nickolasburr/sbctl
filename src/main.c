@@ -13,21 +13,26 @@ int main (int argc, char **argv) {
 	char *serial, *product, *vendor;
 	char *lines = "---";
 	char *pci_spec = "pci";
+	char *pci_mode = "pci";
 	char *pci_type = "pci";
 	char *usb_spec = "usb";
+	char *usb_mode = "usb";
 	char *usb_type = "usb";
 	char *thun_spec = "pci";
-	char *thun_type = "thun";
+	char *thun_mode = "thun";
+	char *thun_type = "pci";
 	char *usb_speed_spec, *thun_speed_spec;
 	int err, index, lindex, power;
 	int usb_speed, thun_speed;
 	unsigned long address, bus, dev_id;
 	unsigned long usb_port, thun_port;
 	unsigned long long frame;
-	io_service_t device, port;
+	io_service_t device, port, bridge;
 	IOUSBDeviceInterface **devif;
 	USB_T *usbif;
 	Thun_T *thunif;
+	Port_T *ports;
+	Bridge_T *bridges;
 
 	lindex = (argc - 1);
 
@@ -105,9 +110,14 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
 
 				/**
-				 * ex., Type: USB
+				 * ex., Mode: USB.
 				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, usb_type);
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_mode);
+
+				/**
+				 * Placeholder for Type (device, hub, bridge, etc.)
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, lines);
 
 				/**
 				 * Get device locationID for bus number.
@@ -270,9 +280,10 @@ int main (int argc, char **argv) {
 				(*devif)->Release(devif);
 			}
 
-			Port_T *ports;
+			FREE(usbif->devices);
+			FREE(usbif);
 
-			ports = ALLOC(sizeof(Port_T));
+			ports = ALLOC(sizeof(ports));
 			ports->length = THUN_get_total_ports(&err);
 
 			if (err) {
@@ -300,10 +311,11 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "|");
 
 				/**
-				 * Thunderbolt spec, type.
+				 * Thunderbolt Spec, Mode, Type.
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
-				fprintf(stdout, "%1s%-*.4s", "", 6, thun_type);
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
+				fprintf(stdout, "%1s%-*.4s", "", 6, "port");
 
 				/**
 				 * Placeholder for Bus, Address columns.
@@ -345,6 +357,82 @@ int main (int argc, char **argv) {
 				 * Placeholders for Vendor and Product Description.
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
+
+				product = THUN_get_port_description(&err, port);
+
+				if (err) {
+					fprintf(stdout, "Error: Could not get next Thunderbolt port description.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.19s", "", 20, product);
+
+
+				fprintf(stdout, "|");
+
+				/**
+				 * Add trailing newline.
+				 */
+				fprintf(stdout, "\n");
+			}
+
+			FREE(ports->ports);
+			FREE(ports);
+
+			bridges = ALLOC(sizeof(bridges));
+			bridges->length = THUN_get_total_bridges(&err);
+
+			if (err) {
+				fprintf(stderr, "Error: Could not get total number of PCI-PCI Thunderbolt bridges.\n");
+
+				exit(EXIT_FAILURE);
+			}
+
+			bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
+
+			/**
+			 * Get Thunderbolt ports.
+			 */
+			THUN_get_bridges(&err, bridges);
+
+			/**
+			 * List PCI-PCI Thunderbolt bridges.
+			 */
+			for (index = 0; index < bridges->length; index += 1) {
+				/**
+				 * Get bridge object.
+				 */
+				bridge = bridges->bridges[index];
+
+				fprintf(stdout, "|");
+
+				/**
+				 * Thunderbolt Spec, Mode, Type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
+				fprintf(stdout, "%1s%-*.4s", "", 6, "bridge");
+
+				/**
+				 * Placeholder for Bus, Address, Port.
+				 */
+				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+
+				/**
+				 * Placeholders for Power, Speed, Serial Number, and Device ID.
+				 */
+				fprintf(stdout, "%1s%-*s", "", 12, lines);
+				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
+
+				/**
+				 * Placeholders for Vendor and Product Description.
+				 */
+				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 				fprintf(stdout, "%1s%-*.19s", "", 20, lines);
 
 
@@ -357,6 +445,9 @@ int main (int argc, char **argv) {
 			}
 
 			fprintf(stdout, LIST_FOOTER);
+
+			FREE(bridges->bridges);
+			FREE(bridges);
 
 			break;
 		/**
