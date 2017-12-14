@@ -11,6 +11,7 @@ volatile int looping = 1;
 int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial, *product, *vendor;
+	char *cmd_arg = NULL;
 	char *lines = "---";
 	char *pci_spec = "pci";
 	char *pci_mode = "pci";
@@ -23,7 +24,7 @@ int main (int argc, char **argv) {
 	char *thun_type = "pci";
 	char *usb_speed_spec, *thun_speed_spec;
 	char *tb_name;
-	int err, index, lindex, power;
+	int count, err, index, lindex, power;
 	int usb_speed, thun_speed;
 	unsigned long address, bus, dev_id;
 	unsigned long usb_port, thun_port;
@@ -46,12 +47,14 @@ int main (int argc, char **argv) {
 	/**
 	 * @todo: Add command, option, option argument[s] validation.
 	 */
-	char *arg = argv[lindex];
+	cmd_arg = argv[lindex];
+
+	count = 0;
 
 	/**
 	 * Handle commands, options based on bitmask.
 	 */
-	switch (ARGV_get_command_bitmask(arg)) {
+	switch (ARGV_get_command_bitmask(cmd_arg)) {
 		/**
 		 * 1. sbctl list, ls [OPTIONS]
 		 */
@@ -104,6 +107,8 @@ int main (int argc, char **argv) {
 				}
 
 				fprintf(stdout, "|");
+
+				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
 
 				/**
 				 * USB spec.
@@ -236,9 +241,9 @@ int main (int argc, char **argv) {
 				}
 
 				/**
-				 * ex., Device ID: 16
+				 * ex., Device ID: 016
 				 */
-				fprintf(stdout, "%1s%-*.2lu", "", 12, dev_id);
+				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
 
 				vendor = USB_get_device_vendor_name(&err, device);
 
@@ -310,6 +315,7 @@ int main (int argc, char **argv) {
 				port = ports->ports[index];
 
 				fprintf(stdout, "|");
+				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -352,7 +358,10 @@ int main (int argc, char **argv) {
 					exit(EXIT_FAILURE);
 				}
 
-				fprintf(stdout, "%1s%-*.2lu", "", 12, dev_id);
+				/**
+				 * Device ID.
+				 */
+				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
 
 				/**
 				 * Placeholders for Vendor and Product Description.
@@ -407,6 +416,7 @@ int main (int argc, char **argv) {
 				bridge = bridges->bridges[index];
 
 				fprintf(stdout, "|");
+				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -470,7 +480,7 @@ int main (int argc, char **argv) {
 
 			break;
 		default:
-			fprintf(stderr, "Invalid option %s\n\n", arg);
+			fprintf(stderr, "Invalid option %s\n\n", cmd_arg);
 
 			ARGV_usage();
 
