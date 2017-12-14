@@ -22,6 +22,7 @@ int main (int argc, char **argv) {
 	char *thun_mode = "thun";
 	char *thun_type = "pci";
 	char *usb_speed_spec, *thun_speed_spec;
+	char *tb_name;
 	int err, index, lindex, power;
 	int usb_speed, thun_speed;
 	unsigned long address, bus, dev_id;
@@ -430,10 +431,19 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
 
 				/**
-				 * Placeholders for Vendor and Product Description.
+				 * Placeholder for Vendor.
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
-				fprintf(stdout, "%1s%-*.19s", "", 20, lines);
+
+				tb_name = THUN_get_bridge_name(&err, bridge);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt bridge name.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
 
 
 				fprintf(stdout, "|");

@@ -11,7 +11,8 @@
 #include "serial.h"
 
 #define kIOPCITunnelledKey "IOPCITunnelled"
-#define kIOPCI2PCIBridgeClassName "IOPCI2PCIBridge"
+#define kIOPCI2PCIBridgeNameKey "IOName"
+#define kIOPCIDeviceClassName "IOPCIDevice"
 #define kIOThunderboltPortClassName "IOThunderboltPort"
 #define kIOThunderboltPortDeviceIDKey "Device ID"
 #define kIOThunderboltPortDescriptionKey "Description"
@@ -73,6 +74,7 @@ void THUN_get_all_services(int *, Service_T *);
  */
 int THUN_get_total_bridges(int *);
 void THUN_get_bridges(int *, Bridge_T *);
+char *THUN_get_bridge_name(int *, io_service_t);
 
 /**
  * Thunderbolt ports.
