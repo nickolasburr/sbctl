@@ -103,7 +103,6 @@ unsigned long THUN_get_port_number (int *err, io_service_t port) {
 	unsigned long port_num;
 	CFNumberRef pn_obj;
 	CFMutableDictionaryRef dict;
-	io_iterator_t iter;
 	kern_return_t status;
 
 	*err = 0;
@@ -121,7 +120,6 @@ unsigned long THUN_get_port_number (int *err, io_service_t port) {
 	}
 
 	CFRelease(pn_obj);
-	IOObjectRelease(iter);
 
 	return port_num;
 
@@ -187,9 +185,9 @@ char *THUN_get_port_description (int *err, io_service_t port) {
 	if (cf_obj && CFStringGetCString(cf_obj, desc_buf, 256, CFStringGetSystemEncoding())) {
 		desc_ptr = ALLOC(sizeof(desc_buf) + NULL_BYTE);
 		copy(desc_ptr, desc_buf);
-	}
 
-	CFRelease(cf_obj);
+		CFRelease(cf_obj);
+	}
 
 	return desc_ptr;
 
@@ -217,7 +215,7 @@ int THUN_get_total_bridges (int *err) {
 
 	*err = 0;
 
-	dict = IOServiceMatching(kIOPCI2PCIBridgeClassName);
+	dict = IOServiceMatching(kIOPCIDeviceClassName);
 
 	if (is_null(dict)) {
 		goto on_error;
@@ -264,7 +262,7 @@ void THUN_get_bridges (int *err, Bridge_T *bridges) {
 
 	*err = 0;
 
-	dict = IOServiceMatching(kIOPCI2PCIBridgeClassName);
+	dict = IOServiceMatching(kIOPCIDeviceClassName);
 
 	if (is_null(dict)) {
 		goto on_error;
@@ -297,4 +295,39 @@ on_error:
 	*err = 1;
 
 	return;
+}
+
+/**
+ * Get bridge name.
+ */
+char *THUN_get_bridge_name (int *err, io_service_t bridge) {
+	char name_buf[256];
+	char *name_ptr = NULL;
+	CFTypeRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(bridge, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOPCI2PCIBridgeNameKey));
+
+	if (cf_obj && CFStringGetCString(cf_obj, name_buf, 256, CFStringGetSystemEncoding())) {
+		name_ptr = ALLOC(sizeof(name_buf) + NULL_BYTE);
+		copy(name_ptr, name_buf);
+
+		CFRelease(cf_obj);
+	}
+
+	return name_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
 }
