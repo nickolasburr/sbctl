@@ -11,33 +11,14 @@
 #include "common.h"
 #include "serial.h"
 
-#ifndef kUSBPortNumberKey
 #define kUSBPortNumberKey "PortNum"
-#endif
 
-#ifndef UNITS_BUS_POWER
 #define UNITS_BUS_POWER "mA"
-#endif
-
-#ifndef USB_LOW_SPEED
 #define USB_LOW_SPEED "1.5"
-#endif
-
-#ifndef USB_FULL_SPEED
 #define USB_FULL_SPEED "12"
-#endif
-
-#ifndef USB_HIGH_SPEED
 #define USB_HIGH_SPEED "480"
-#endif
-
-#ifndef USB_SUPER_SPEED
 #define USB_SUPER_SPEED "5120"
-#endif
-
-#ifndef USB_SUPER_SPEED_PLUS
 #define USB_SUPER_SPEED_PLUS "20480"
-#endif
 
 typedef Serial_T USB_T;
 
