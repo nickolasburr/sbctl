@@ -1,6 +1,6 @@
 # sbctl
 
-`sbctl` is a serial bus controller for macOS.
+`sbctl` is a macOS serial bus controller.
 
 ## Installation
 
@@ -23,3 +23,5 @@ make install
 ## Commands
 
 `list`, `ls`: List all serial devices.
+`get`: Get information for specific bus, device[s].
+`set`: Update properties of specific bus, device.
