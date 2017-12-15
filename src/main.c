@@ -97,7 +97,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get device interface.
 				 */
-				devif = USB_get_device_interface(&err, device);
+				devif = USB_get_device_interface(&err, &device);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device interface.\n");
@@ -160,7 +160,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get device port number.
 				 */
-				usb_port = USB_get_device_port_number(&err, device);
+				usb_port = USB_get_device_port_number(&err, &device);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB port number.\n");
@@ -214,7 +214,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.5s", "", 14, usb_speed_spec);
 
-				serial = USB_get_device_serial_number(&err, device);
+				serial = USB_get_device_serial_number(&err, &device);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device serial number.\n");
@@ -244,7 +244,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
 
-				vendor = USB_get_device_vendor_name(&err, device);
+				vendor = USB_get_device_vendor_name(&err, &device);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device vendor name.\n");
@@ -261,7 +261,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, vendor);
 
-				product = USB_get_device_product_name(&err, device);
+				product = USB_get_device_product_name(&err, &device);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device product name.\n");
