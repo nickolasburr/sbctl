@@ -23,18 +23,19 @@ int main (int argc, char **argv) {
 	char *thun_mode = "thun";
 	char *thun_type = "pci";
 	char *usb_speed_spec, *thun_speed_spec;
-	char *tb_name;
+	char *tb_name, *ts_name, *ts_vendor;
 	int count, err, index, lindex, power;
 	int usb_speed, thun_speed;
 	unsigned long address, bus, dev_id;
 	unsigned long usb_port, thun_port;
 	unsigned long long frame;
-	io_service_t device, port, bridge;
+	io_service_t device, port, bridge, swit;
 	IOUSBDeviceInterface **devif;
 	USB_T *usbif;
 	Thun_T *thunif;
 	Port_T *ports;
 	Bridge_T *bridges;
+	Switch_T *switches;
 
 	lindex = (argc - 1);
 
@@ -464,10 +465,86 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "\n");
 			}
 
-			fprintf(stdout, LIST_FOOTER);
-
 			FREE(bridges->bridges);
 			FREE(bridges);
+
+			switches = ALLOC(sizeof(switches));
+			switches->length = THUN_get_total_all_switches(&err);
+
+			if (err) {
+				fprintf(stderr, "Error: Could not get total number of Thunderbolt switches.\n");
+
+				exit(EXIT_FAILURE);
+			}
+
+			switches->switches = ALLOC(sizeof(io_service_t) * switches->length);
+
+			THUN_get_all_switches(&err, switches);
+
+			/**
+			 * List Thunderbolt switches.
+			 */
+			for (index = 0; index < switches->length; index += 1) {
+				/**
+				 * Get switch object.
+				 */
+				swit = switches->switches[index];
+
+				fprintf(stdout, "|");
+				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+
+				/**
+				 * Thunderbolt Spec, Mode, Type.
+				 */
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
+				fprintf(stdout, "%1s%-*.4s", "", 6, "switch");
+
+				/**
+				 * Placeholder for Bus, Address, Port.
+				 */
+				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+
+				/**
+				 * Placeholders for Power, Speed, Serial Number, and Device ID.
+				 */
+				fprintf(stdout, "%1s%-*s", "", 12, lines);
+				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
+
+				ts_vendor = THUN_get_switch_vendor(&err, swit);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt switch vendor name.\n");
+				}
+
+				fprintf(stdout, "%1s%-*.5s", "", 8, ts_vendor);
+
+				ts_name = THUN_get_switch_name(&err, swit);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt switch model name.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.19s", "", 20, ts_name);
+
+				fprintf(stdout, "|");
+
+				/**
+				 * Add trailing newline.
+				 */
+				fprintf(stdout, "\n");
+			}
+
+			FREE(switches->switches);
+			FREE(switches);
+
+			fprintf(stdout, LIST_FOOTER);
 
 			break;
 		/**
