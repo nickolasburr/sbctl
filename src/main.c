@@ -61,8 +61,9 @@ int main (int argc, char **argv) {
 		 */
 		case MASK_CMD_LIST:
 			/**
-			 * Alloc for USB_T instance.
+			 * USB hubs, buses, etc.
 			 */
+
 			usbif = ALLOC(sizeof(USB_T));
 			usbif->length = USB_get_total_devices(&err);
 
@@ -87,9 +88,6 @@ int main (int argc, char **argv) {
 
 			fprintf(stdout, LIST_HEADER);
 
-			/**
-			 * List USB devices.
-			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				/**
 				 * Get device object.
@@ -290,6 +288,10 @@ int main (int argc, char **argv) {
 			FREE(usbif->devices);
 			FREE(usbif);
 
+			/**
+			 * PCI, Thunderbolt.
+			 */
+
 			ports = ALLOC(sizeof(ports));
 			ports->length = THUN_get_total_ports(&err);
 
@@ -331,7 +333,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 
-				thun_port = THUN_get_port_number(&err, port);
+				thun_port = THUN_get_port_number(&err, &port);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt port number.\n");
@@ -351,7 +353,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
 
-				dev_id = THUN_get_port_device_id(&err, port);
+				dev_id = THUN_get_port_device_id(&err, &port);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt port device ID.\n");
@@ -369,7 +371,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 
-				product = THUN_get_port_description(&err, port);
+				product = THUN_get_port_description(&err, &port);
 
 				if (err) {
 					fprintf(stdout, "Error: Could not get next Thunderbolt port description.\n");
@@ -446,7 +448,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 
-				tb_name = THUN_get_bridge_name(&err, bridge);
+				tb_name = THUN_get_bridge_name(&err, &bridge);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt bridge name.\n");
@@ -515,7 +517,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
 
-				ts_vendor = THUN_get_switch_vendor(&err, swit);
+				ts_vendor = THUN_get_switch_vendor(&err, &swit);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt switch vendor name.\n");
@@ -523,7 +525,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.5s", "", 8, ts_vendor);
 
-				ts_name = THUN_get_switch_name(&err, swit);
+				ts_name = THUN_get_switch_name(&err, &swit);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt switch model name.\n");
