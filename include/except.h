@@ -31,10 +31,6 @@ enum {
 	Except_finalized
 };
 
-#ifdef WIN32
-__declspec(thread)
-#endif
-
 extern Except_Frame *Except_stack;
 extern const Except_T Assert_Failed;
 
