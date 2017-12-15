@@ -146,7 +146,7 @@ on_error:
 /**
  * Get device interface.
  */
-IOUSBDeviceInterface **USB_get_device_interface (int *err, io_service_t device) {
+IOUSBDeviceInterface **USB_get_device_interface (int *err, io_service_t *device) {
 	IOCFPlugInInterface  **plgif = NULL;
 	IOUSBDeviceInterface **devif = NULL;
 	IOReturn result;
@@ -154,7 +154,7 @@ IOUSBDeviceInterface **USB_get_device_interface (int *err, io_service_t device) 
 
 	*err = 0;
 
-	result = IOCreatePlugInInterfaceForService(device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plgif, &score);
+	result = IOCreatePlugInInterfaceForService(*device, kIOUSBDeviceUserClientTypeID, kIOCFPlugInInterfaceID, &plgif, &score);
 
 	if (!(result == kIOReturnSuccess && !is_null(plgif))) {
 		goto on_error;
@@ -356,7 +356,7 @@ char *USB_get_device_speed_as_spec (int *err, int speed) {
 /**
  * Get device serial number.
  */
-char *USB_get_device_serial_number (int *err, io_service_t device) {
+char *USB_get_device_serial_number (int *err, io_service_t *device) {
 	char serial[256];
 	char *serial_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -366,7 +366,7 @@ char *USB_get_device_serial_number (int *err, io_service_t device) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*device, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -392,7 +392,7 @@ on_error:
 /**
  * Get device port number.
  */
-unsigned long USB_get_device_port_number (int *err, io_service_t device) {
+unsigned long USB_get_device_port_number (int *err, io_service_t *device) {
 	unsigned long port_num;
 	CFMutableDictionaryRef dict;
 	CFNumberRef pn_obj;
@@ -401,7 +401,7 @@ unsigned long USB_get_device_port_number (int *err, io_service_t device) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*device, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -424,7 +424,7 @@ on_error:
 /**
  * Get device product name.
  */
-char *USB_get_device_product_name (int *err, io_service_t device) {
+char *USB_get_device_product_name (int *err, io_service_t *device) {
 	char pn[256];
 	char *pn_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -434,7 +434,7 @@ char *USB_get_device_product_name (int *err, io_service_t device) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*device, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -458,7 +458,7 @@ on_error:
 /**
  * Get device vendor name.
  */
-char *USB_get_device_vendor_name (int *err, io_service_t device) {
+char *USB_get_device_vendor_name (int *err, io_service_t *device) {
 	char vn[256];
 	char *vn_ptr = NULL;
 	CFMutableDictionaryRef dict;
@@ -468,7 +468,7 @@ char *USB_get_device_vendor_name (int *err, io_service_t device) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(device, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*device, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
