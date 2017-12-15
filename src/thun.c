@@ -99,7 +99,7 @@ on_error:
 /**
  * Get port number.
  */
-unsigned long THUN_get_port_number (int *err, io_service_t port) {
+unsigned long THUN_get_port_number (int *err, io_service_t *port) {
 	unsigned long port_num;
 	CFNumberRef pn_obj;
 	CFMutableDictionaryRef dict;
@@ -107,7 +107,7 @@ unsigned long THUN_get_port_number (int *err, io_service_t port) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(port, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*port, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -132,7 +132,7 @@ on_error:
 /**
  * Get port number.
  */
-unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
+unsigned long THUN_get_port_device_id (int *err, io_service_t *port) {
 	unsigned long dev_id;
 	CFNumberRef cf_obj;
 	CFMutableDictionaryRef dict;
@@ -140,7 +140,7 @@ unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(port, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*port, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -165,7 +165,7 @@ on_error:
 /**
  * Get port description.
  */
-char *THUN_get_port_description (int *err, io_service_t port) {
+char *THUN_get_port_description (int *err, io_service_t *port) {
 	char desc_buf[256];
 	char *desc_ptr = NULL;
 	CFTypeRef cf_obj;
@@ -174,7 +174,7 @@ char *THUN_get_port_description (int *err, io_service_t port) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(port, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*port, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -300,7 +300,7 @@ on_error:
 /**
  * Get bridge name.
  */
-char *THUN_get_bridge_name (int *err, io_service_t bridge) {
+char *THUN_get_bridge_name (int *err, io_service_t *bridge) {
 	char name_buf[256];
 	char *name_ptr = NULL;
 	CFTypeRef cf_obj;
@@ -309,7 +309,7 @@ char *THUN_get_bridge_name (int *err, io_service_t bridge) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(bridge, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*bridge, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -336,6 +336,10 @@ on_error:
  *
  * Thunderbolt switches.
  *
+ */
+
+/**
+ * Get total number of (type1 & type2) PCI Thunderbolt switches.
  */
 int THUN_get_total_all_switches (int *err) {
 	int index;
@@ -473,7 +477,7 @@ on_error:
 /**
  * Get switch name.
  */
-char *THUN_get_switch_name (int *err, io_service_t swit) {
+char *THUN_get_switch_name (int *err, io_service_t *swit) {
 	char name_buf[256];
 	char *name_ptr = NULL;
 	CFTypeRef cf_obj;
@@ -482,7 +486,7 @@ char *THUN_get_switch_name (int *err, io_service_t swit) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(swit, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*swit, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;
@@ -508,7 +512,7 @@ on_error:
 /**
  * Get switch vendor.
  */
-char *THUN_get_switch_vendor (int *err, io_service_t swit) {
+char *THUN_get_switch_vendor (int *err, io_service_t *swit) {
 	char name_buf[256];
 	char *name_ptr = NULL;
 	CFTypeRef cf_obj;
@@ -517,7 +521,7 @@ char *THUN_get_switch_vendor (int *err, io_service_t swit) {
 
 	*err = 0;
 
-	status = IORegistryEntryCreateCFProperties(swit, &dict, kCFAllocatorDefault, kNilOptions);
+	status = IORegistryEntryCreateCFProperties(*swit, &dict, kCFAllocatorDefault, kNilOptions);
 
 	if (status != KERN_SUCCESS) {
 		goto on_error;

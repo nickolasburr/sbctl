@@ -77,16 +77,16 @@ void THUN_get_all_services(int *, Service_T *);
  */
 int THUN_get_total_bridges(int *);
 void THUN_get_bridges(int *, Bridge_T *);
-char *THUN_get_bridge_name(int *, io_service_t);
+char *THUN_get_bridge_name(int *, io_service_t *);
 
 /**
  * Thunderbolt ports.
  */
 int THUN_get_total_ports(int *);
 void THUN_get_ports(int *, Port_T *);
-unsigned long THUN_get_port_device_id(int *, io_service_t);
-unsigned long THUN_get_port_number(int *, io_service_t);
-char *THUN_get_port_description(int *, io_service_t);
+unsigned long THUN_get_port_device_id(int *, io_service_t *);
+unsigned long THUN_get_port_number(int *, io_service_t *);
+char *THUN_get_port_description(int *, io_service_t *);
 
 /**
  * Thunderbolt switches (built-in, external).
@@ -100,7 +100,7 @@ void THUN_get_type1_switches(int *, Switch_T *);
 int THUN_get_total_type2_switches(int *);
 void THUN_get_type2_switches(int *, Switch_T *);
 
-char *THUN_get_switch_name(int *, io_service_t);
-char *THUN_get_switch_vendor(int *, io_service_t);
+char *THUN_get_switch_name(int *, io_service_t *);
+char *THUN_get_switch_vendor(int *, io_service_t *);
 
 #endif /* SBCTL_THUN_H */
