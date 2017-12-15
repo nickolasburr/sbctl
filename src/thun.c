@@ -113,7 +113,7 @@ unsigned long THUN_get_port_number (int *err, io_service_t port) {
 		goto on_error;
 	}
 
-	pn_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortNumberKey));
+	pn_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortPortNumberKey));
 
 	if (!(pn_obj && CFNumberGetValue(pn_obj, kCFNumberLongType, &port_num))) {
 		goto on_error;
@@ -134,7 +134,7 @@ on_error:
  */
 unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
 	unsigned long dev_id;
-	CFNumberRef di_obj;
+	CFNumberRef cf_obj;
 	CFMutableDictionaryRef dict;
 	kern_return_t status;
 
@@ -146,13 +146,13 @@ unsigned long THUN_get_port_device_id (int *err, io_service_t port) {
 		goto on_error;
 	}
 
-	di_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortDeviceIDKey));
+	cf_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortDeviceIDKey));
 
-	if (!(di_obj && CFNumberGetValue(di_obj, kCFNumberLongType, &dev_id))) {
+	if (!(cf_obj && CFNumberGetValue(cf_obj, kCFNumberLongType, &dev_id))) {
 		goto on_error;
 	}
 
-	CFRelease(di_obj);
+	CFRelease(cf_obj);
 
 	return (((unsigned long) dev_id >> 8) & 0xFF);
 
@@ -316,6 +316,214 @@ char *THUN_get_bridge_name (int *err, io_service_t bridge) {
 	}
 
 	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOPCI2PCIBridgeNameKey));
+
+	if (cf_obj && CFStringGetCString(cf_obj, name_buf, 256, CFStringGetSystemEncoding())) {
+		name_ptr = ALLOC(sizeof(name_buf) + NULL_BYTE);
+		copy(name_ptr, name_buf);
+
+		CFRelease(cf_obj);
+	}
+
+	return name_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ *
+ * Thunderbolt switches.
+ *
+ */
+int THUN_get_total_all_switches (int *err) {
+	int index;
+	CFMutableDictionaryRef dict;
+	io_iterator_t iter;
+	io_service_t swit;
+	kern_return_t status;
+
+	*err = 0;
+
+	/**
+	 * Type 1 switches.
+	 */
+	dict = IOServiceMatching(kIOThunderboltSwitchType1ClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((swit = IOIteratorNext(iter))) {
+		index++;
+
+		IOObjectRelease(swit);
+	}
+
+	IOObjectRelease(iter);
+
+	/**
+	 * Type 2 switches.
+	 */
+	dict = IOServiceMatching(kIOThunderboltSwitchType2ClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	while ((swit = IOIteratorNext(iter))) {
+		index++;
+
+		IOObjectRelease(swit);
+	}
+
+	IOObjectRelease(iter);
+
+	return index;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get all Thunderbolt switches.
+ */
+void THUN_get_all_switches (int *err, Switch_T *switches) {
+	int index;
+	CFMutableDictionaryRef dict;
+	io_iterator_t iter;
+	io_service_t swit;
+	kern_return_t status;
+
+	*err = 0;
+
+	/**
+	 * Type 1 switches.
+	 */
+	dict = IOServiceMatching(kIOThunderboltSwitchType1ClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	index = 0;
+
+	while ((swit = IOIteratorNext(iter))) {
+		switches->switches[index] = swit;
+
+		index++;
+	}
+
+	IOObjectRelease(iter);
+
+	/**
+	 * Type 2 switches.
+	 */
+	dict = IOServiceMatching(kIOThunderboltSwitchType2ClassName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	while ((swit = IOIteratorNext(iter))) {
+		switches->switches[index] = swit;
+
+		index++;
+	}
+
+	IOObjectRelease(iter);
+
+	return;
+
+on_error:
+	*err = 1;
+
+	return;
+}
+
+/**
+ * Get switch name.
+ */
+char *THUN_get_switch_name (int *err, io_service_t swit) {
+	char name_buf[256];
+	char *name_ptr = NULL;
+	CFTypeRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(swit, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltSwitchDeviceModelNameKey));
+
+	if (cf_obj && CFStringGetCString(cf_obj, name_buf, 256, CFStringGetSystemEncoding())) {
+		name_ptr = ALLOC(sizeof(name_buf) + NULL_BYTE);
+		copy(name_ptr, name_buf);
+
+		CFRelease(cf_obj);
+	}
+
+	return name_ptr;
+
+on_error:
+	*err = 1;
+
+	return NULL;
+}
+
+/**
+ * Get switch vendor.
+ */
+char *THUN_get_switch_vendor (int *err, io_service_t swit) {
+	char name_buf[256];
+	char *name_ptr = NULL;
+	CFTypeRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(swit, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltSwitchDeviceVendorNameKey));
 
 	if (cf_obj && CFStringGetCString(cf_obj, name_buf, 256, CFStringGetSystemEncoding())) {
 		name_ptr = ALLOC(sizeof(name_buf) + NULL_BYTE);

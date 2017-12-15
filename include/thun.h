@@ -13,13 +13,16 @@
 #define kIOPCITunnelledKey "IOPCITunnelled"
 #define kIOPCI2PCIBridgeNameKey "IOName"
 #define kIOPCIDeviceClassName "IOPCIDevice"
+
 #define kIOThunderboltPortClassName "IOThunderboltPort"
 #define kIOThunderboltPortDeviceIDKey "Device ID"
 #define kIOThunderboltPortDescriptionKey "Description"
-#define kIOThunderboltPortNumberKey "Port Number"
+#define kIOThunderboltPortPortNumberKey "Port Number"
+
 #define kIOThunderboltSwitchType1ClassName "IOThunderboltSwitchType1"
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
-#define kIOPCITunnelledKey "IOPCITunnelled"
+#define kIOThunderboltSwitchDeviceModelNameKey "Device Model Name"
+#define kIOThunderboltSwitchDeviceVendorNameKey "Device Vendor Name"
 
 typedef struct Bridge_T Bridge_T;
 typedef struct Device_T Device_T;
@@ -81,12 +84,12 @@ char *THUN_get_bridge_name(int *, io_service_t);
  */
 int THUN_get_total_ports(int *);
 void THUN_get_ports(int *, Port_T *);
-unsigned long THUN_get_port_number(int *, io_service_t);
 unsigned long THUN_get_port_device_id(int *, io_service_t);
+unsigned long THUN_get_port_number(int *, io_service_t);
 char *THUN_get_port_description(int *, io_service_t);
 
 /**
- * Thunderbolt switches (built-in and external).
+ * Thunderbolt switches (built-in, external).
  */
 int THUN_get_total_all_switches(int *);
 void THUN_get_all_switches(int *, Switch_T *);
@@ -96,5 +99,8 @@ void THUN_get_type1_switches(int *, Switch_T *);
 
 int THUN_get_total_type2_switches(int *);
 void THUN_get_type2_switches(int *, Switch_T *);
+
+char *THUN_get_switch_name(int *, io_service_t);
+char *THUN_get_switch_vendor(int *, io_service_t);
 
 #endif /* SBCTL_THUN_H */
