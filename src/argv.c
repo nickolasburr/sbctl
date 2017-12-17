@@ -10,15 +10,21 @@ static Command_T commands[] = {
 	{
 		"list",
 		"ls",
-		"List available devices.",
+		"List all known serial devices.",
 		MASK_CMD_LIST,
 	},
 	{
 		"get",
 		NULL,
-		"Get information for specific device[s].",
+		"Get information specific to device.",
 		MASK_CMD_GET,
-	}
+	},
+	{
+		"set",
+		NULL,
+		"Set, modify properties of specific device.",
+		MASK_CMD_SET,
+	},
 };
 
 /**
