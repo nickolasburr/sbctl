@@ -11,7 +11,7 @@
 #include "error.h"
 #include "utils.h"
 
-#define NUM_CMDS 2
+#define NUM_CMDS 3
 
 /**
  * Hex masks for commands, options.
