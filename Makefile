@@ -32,10 +32,10 @@ $(TARGET): $(CSFILES)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 clean:
-	@cd $(TOOLS) && ./clean.sh
+	@unset CDPATH; cd $(TOOLS) && ./clean.sh
 
 install:
-	@cd $(TOOLS) && ./install.sh
+	@unset CDPATH; cd $(TOOLS) && ./install.sh
 
 uninstall:
-	@cd $(TOOLS) && ./uninstall.sh
+	@unset CDPATH; @cd $(TOOLS) && ./uninstall.sh
