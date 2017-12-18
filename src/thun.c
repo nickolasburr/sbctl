@@ -215,7 +215,7 @@ int THUN_get_total_bridges (int *err) {
 
 	*err = 0;
 
-	dict = IOServiceMatching(kIOPCIDeviceClassName);
+	dict = IOServiceMatching(kIOPCIBridgeClassName);
 
 	if (is_null(dict)) {
 		goto on_error;
@@ -262,7 +262,7 @@ void THUN_get_bridges (int *err, Bridge_T *bridges) {
 
 	*err = 0;
 
-	dict = IOServiceMatching(kIOPCIDeviceClassName);
+	dict = IOServiceMatching(kIOPCIBridgeClassName);
 
 	if (is_null(dict)) {
 		goto on_error;
@@ -315,7 +315,7 @@ char *THUN_get_bridge_name (int *err, io_service_t *bridge) {
 		goto on_error;
 	}
 
-	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOPCI2PCIBridgeNameKey));
+	cf_obj = (CFStringRef) CFDictionaryGetValue(dict, CFSTR(kIOPCIBridgeNameKey));
 
 	if (cf_obj && CFStringGetCString(cf_obj, name_buf, 256, CFStringGetSystemEncoding())) {
 		name_ptr = ALLOC(sizeof(name_buf) + NULL_BYTE);
@@ -330,6 +330,48 @@ on_error:
 	*err = 1;
 
 	return NULL;
+}
+
+/**
+ * Get bus number of PCI bridge.
+ */
+unsigned long THUN_get_bridge_bus_number (int *err, io_service_t *bridge) {
+	unsigned char *data_buf = NULL;
+	unsigned long total_bytes;
+	CFDataRef cf_data;
+
+	*err = 0;
+
+	/**
+	 * Iterate through parent entries and
+	 * look for the controlling PCI bus.
+	 */
+	cf_data = (CFDataRef) IORegistryEntrySearchCFProperty(*bridge, kIOServicePlane, CFSTR(kIOPCIBridgeBusRegisterKey), kCFAllocatorDefault, kIORegistryIterateParents);
+
+	if (!cf_data) {
+		goto on_error;
+	}
+
+	/**
+	 * Get length of raw bytes.
+	 */
+	total_bytes = CFDataGetLength(cf_data);
+
+	/**
+	 * Alloc based on # of raw bytes (various registers have different
+	 * thresholds), and store the raw bytes in our data buffer array.
+	 */
+	data_buf = ALLOC(sizeof(data_buf) * total_bytes);
+	CFDataGetBytes(cf_data, CFRangeMake(0, total_bytes), data_buf);
+
+	CFRelease(cf_data);
+
+	return (unsigned long) data_buf[2];
+
+on_error:
+	*err = 1;
+
+	return -1;
 }
 
 /**

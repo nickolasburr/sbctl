@@ -11,8 +11,9 @@
 #include "serial.h"
 
 #define kIOPCITunnelledKey "IOPCITunnelled"
-#define kIOPCI2PCIBridgeNameKey "IOName"
-#define kIOPCIDeviceClassName "IOPCIDevice"
+#define kIOPCIBridgeNameKey "IOName"
+#define kIOPCIBridgeClassName "IOPCIDevice"
+#define kIOPCIBridgeBusRegisterKey "reg"
 
 #define kIOThunderboltPortClassName "IOThunderboltPort"
 #define kIOThunderboltPortDeviceIDKey "Device ID"
@@ -77,6 +78,7 @@ void THUN_get_all_services(int *, Service_T *);
  */
 int THUN_get_total_bridges(int *);
 void THUN_get_bridges(int *, Bridge_T *);
+unsigned long THUN_get_bridge_bus_number(int *, io_service_t *);
 char *THUN_get_bridge_name(int *, io_service_t *);
 
 /**
