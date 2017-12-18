@@ -336,7 +336,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Bus, Address columns.
 				 */
-				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
+				fprintf(stdout, "%1s%-*.3lu", "", 5, THUN_get_port_bus_number(&err, &port));
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 
 				thun_port = THUN_get_port_number(&err, &port);

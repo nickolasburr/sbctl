@@ -11,6 +11,7 @@
 #include "serial.h"
 
 #define kIOPCITunnelledKey "IOPCITunnelled"
+#define kIOPCITunnelControllerIDKey "IOPCITunnelControllerID"
 #define kIOPCIBridgeNameKey "IOName"
 #define kIOPCIBridgeClassName "IOPCIDevice"
 #define kIOPCIBridgeBusRegisterKey "reg"
@@ -86,6 +87,7 @@ char *THUN_get_bridge_name(int *, io_service_t *);
  */
 int THUN_get_total_ports(int *);
 void THUN_get_ports(int *, Port_T *);
+unsigned long THUN_get_port_bus_number(int *, io_service_t *);
 unsigned long THUN_get_port_device_id(int *, io_service_t *);
 unsigned long THUN_get_port_number(int *, io_service_t *);
 char *THUN_get_port_description(int *, io_service_t *);
