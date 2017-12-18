@@ -10,7 +10,9 @@ volatile int looping = 1;
 
 int main (int argc, char **argv) {
 	char bus_buf[5];
-	char *serial, *product, *vendor;
+	char *serial = NULL;
+	char *product = NULL;
+	char *vendor = NULL;
 	char *cmd_arg = NULL;
 	char *lines = "---";
 	char *pci_spec = "pci";
@@ -22,12 +24,16 @@ int main (int argc, char **argv) {
 	char *thun_spec = "pci";
 	char *thun_mode = "thun";
 	char *thun_type = "pci";
-	char *usb_speed_spec, *thun_speed_spec;
-	char *tb_name, *ts_name, *ts_vendor;
+	char *usb_speed_spec = NULL;
+	char *thun_speed_spec = NULL;
+	char *tb_name = NULL;
+	char *ts_name = NULL;
+	char *ts_vendor = NULL;
 	int count, err, index, lindex, power;
 	int usb_speed, thun_speed;
-	unsigned long address, bus, dev_id;
+	unsigned long address, usb_bus, dev_id;
 	unsigned long usb_port, thun_port;
+	unsigned long tb_bus, tp_bus, ts_bus;
 	unsigned long long frame;
 	io_service_t device, port, bridge, swit;
 	IOUSBDeviceInterface **devif;
@@ -64,7 +70,7 @@ int main (int argc, char **argv) {
 			 * USB hubs, buses, etc.
 			 */
 
-			usbif = ALLOC(sizeof(USB_T));
+			usbif = ALLOC(sizeof(usbif));
 			usbif->length = USB_get_total_devices(&err);
 
 			if (err) {
@@ -127,7 +133,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get device locationID for bus number.
 				 */
-				bus = USB_get_device_location_id(&err, devif);
+				usb_bus = USB_get_device_location_id(&err, devif);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device location ID.\n");
@@ -138,7 +144,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Format locationID into hex for strtoul.
 				 */
-				snprintf(bus_buf, 5, "%#lx", bus);
+				snprintf(bus_buf, 5, "%#lx", usb_bus);
 				fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
 				/**
@@ -153,9 +159,9 @@ int main (int argc, char **argv) {
 				}
 
 				/**
-				 * ex., Address: 01
+				 * ex., Address: 001
 				 */
-				fprintf(stdout, "%1s%-*.2lu", "", 9, address);
+				fprintf(stdout, "%1s%-*.3lu", "", 9, address);
 
 				/**
 				 * Get device port number.
@@ -429,9 +435,21 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.4s", "", 6, "bridge");
 
 				/**
-				 * Placeholder for Bus, Address, Port.
+				 * Get bridge bus number.
 				 */
-				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
+				tb_bus = THUN_get_bridge_bus_number(&err, &bridge);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt bridge bus number.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.3lu", "", 5, tb_bus);
+
+				/**
+				 * Placeholder for Address, Port.
+				 */
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
 
@@ -448,6 +466,9 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 
+				/**
+				 * Get Thunderbolt bridge name.
+				 */
 				tb_name = THUN_get_bridge_name(&err, &bridge);
 
 				if (err) {
@@ -457,7 +478,6 @@ int main (int argc, char **argv) {
 				}
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
-
 
 				fprintf(stdout, "|");
 
@@ -479,7 +499,7 @@ int main (int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			}
 
-			switches->switches = ALLOC(sizeof(io_service_t) * switches->length);
+			switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
 
 			THUN_get_all_switches(&err, switches);
 
@@ -556,6 +576,15 @@ int main (int argc, char **argv) {
 		 */
 		case MASK_CMD_GET:
 			fprintf(stdout, "Information for device.\n");
+
+			break;
+		/**
+		 * 3. sbctl set [OPTIONS]
+		 *
+		 * @todo: Build out set functionality.
+		 */
+		case MASK_CMD_SET:
+			fprintf(stdout, "Setting properties on device.\n");
 
 			break;
 		default:
