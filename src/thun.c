@@ -201,18 +201,17 @@ on_error:
  * Get bus number of Thunderbolt port.
  */
 unsigned long THUN_get_port_bus_number (int *err, io_service_t *port) {
-	int index, equal;
 	unsigned char *data_buf = NULL;
 	unsigned long total_bytes;
-	CFMutableDictionaryRef dict, ndict;
+	CFMutableDictionaryRef dict;
 	CFDataRef cf_data;
-	io_iterator_t iter, niter;
-	io_service_t controller, subord;
-	kern_return_t status, nstatus;
+	io_iterator_t iter;
+	io_service_t controller;
+	kern_return_t status;
 
 	*err = 0;
 
-	dict = IOServiceMatching(kIOPCIBridgeClassName);
+	dict = IOServiceNameMatching(kIOThunderboltPortNativeHostInterfaceName);
 
 	if (is_null(dict)) {
 		goto on_error;
@@ -224,64 +223,42 @@ unsigned long THUN_get_port_bus_number (int *err, io_service_t *port) {
 		goto on_error;
 	}
 
-	index = 0;
-
-	while ((controller = IOIteratorNext(iter))) {
-		status = IORegistryEntryGetChildIterator(controller, kIOServicePlane, &niter);
-
-		if (nstatus != KERN_SUCCESS) {
-			goto on_error;
-		}
-
-		while ((subord = IOIteratorNext(niter))) {
-			if (IOObjectIsEqualTo(subord, *port)) {
-				equal = 1;
-			}
-
-			IOObjectRelease(subord);
-
-			if (equal) {
-				status = IORegistryEntryCreateCFProperties(controller, &ndict, kCFAllocatorDefault, kNilOptions);
-
-				if (status != KERN_SUCCESS) {
-					goto on_error;
-				}
-
-				cf_data = (CFDataRef) CFDictionaryGetValue(ndict, CFSTR(kIOPCIBridgeBusRegisterKey));
-
-				if (!cf_data) {
-					goto on_error;
-				}
-
-				/**
-				 * Get length of raw bytes.
-				 */
-				total_bytes = CFDataGetLength(cf_data);
-
-				/**
-				 * Alloc based on # of raw bytes (various registers have different
-				 * thresholds), and store the raw bytes in our data buffer array.
-				 */
-				data_buf = ALLOC(sizeof(data_buf) * total_bytes);
-				CFDataGetBytes(cf_data, CFRangeMake(0, total_bytes), data_buf);
-
-				IOObjectRelease(niter);
-				IOObjectRelease(controller);
-				CFRelease(cf_data);
-
-				return (unsigned long) data_buf[2];
-			}
-		}
-
-		IOObjectRelease(niter);
-		IOObjectRelease(controller);
-
-		index++;
+	if (!(controller = IOIteratorNext(iter))) {
+		goto on_error;
 	}
 
-	IOObjectRelease(iter);
+	status = IORegistryEntryCreateCFProperties(controller, &dict, kCFAllocatorDefault, kNilOptions);
 
-	return -1;
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	/**
+	 * Iterate through parent entries and
+	 * look for the controlling PCI bus.
+	 */
+	cf_data = (CFDataRef) CFDictionaryGetValue(dict, CFSTR(kIOPCIBridgeBusRegisterKey));
+
+	if (!cf_data) {
+		goto on_error;
+	}
+
+	/**
+	 * Get length of raw bytes.
+	 */
+	total_bytes = CFDataGetLength(cf_data);
+
+	/**
+	 * Alloc based on # of raw bytes (various registers have different
+	 * thresholds), and store the raw bytes in our data buffer array.
+	 */
+	data_buf = ALLOC(sizeof(data_buf) * total_bytes);
+	CFDataGetBytes(cf_data, CFRangeMake(0, total_bytes), data_buf);
+
+	IOObjectRelease(iter);
+	CFRelease(cf_data);
+
+	return (unsigned long) data_buf[2];
 
 on_error:
 	*err = 1;

@@ -20,6 +20,7 @@
 #define kIOThunderboltPortDeviceIDKey "Device ID"
 #define kIOThunderboltPortDescriptionKey "Description"
 #define kIOThunderboltPortPortNumberKey "Port Number"
+#define kIOThunderboltPortNativeHostInterfaceName "NHI0"
 
 #define kIOThunderboltSwitchType1ClassName "IOThunderboltSwitchType1"
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
