@@ -621,9 +621,9 @@ on_error:
 /**
  * Get switch name.
  */
-char *THUN_get_switch_name (int *err, io_service_t *swit) {
+const char *THUN_get_switch_name (int *err, io_service_t *swit) {
 	char name_buf[256];
-	char *name_ptr = NULL;
+	const char *name_ptr = NULL;
 	CFTypeRef cf_obj;
 	CFMutableDictionaryRef dict;
 	kern_return_t status;
@@ -654,11 +654,44 @@ on_error:
 }
 
 /**
+ * Get port version.
+ */
+unsigned int THUN_get_switch_thunderbolt_version (int *err, io_service_t *swit) {
+	unsigned int tb_vers;
+	CFNumberRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(*swit, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltSwitchThunderboltVersionKey));
+
+	if (!(cf_obj && CFNumberGetValue(cf_obj, kCFNumberIntType, &tb_vers))) {
+		goto on_error;
+	}
+
+	CFRelease(cf_obj);
+
+	return tb_vers;
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
  * Get switch vendor.
  */
-char *THUN_get_switch_vendor (int *err, io_service_t *swit) {
+const char *THUN_get_switch_vendor (int *err, io_service_t *swit) {
 	char name_buf[256];
-	char *name_ptr = NULL;
+	const char *name_ptr = NULL;
 	CFTypeRef cf_obj;
 	CFMutableDictionaryRef dict;
 	kern_return_t status;
