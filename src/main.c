@@ -11,7 +11,7 @@ volatile int looping = 1;
 int main (int argc, char **argv) {
 	char bus_buf[5];
 	char *serial = NULL;
-	char *product = NULL;
+	const char *product = NULL;
 	char *vendor = NULL;
 	char *cmd_arg = NULL;
 	char *lines = "---";
@@ -31,7 +31,8 @@ int main (int argc, char **argv) {
 	char *ts_vendor = NULL;
 	int count, err, index, lindex, power;
 	int usb_speed, thun_speed;
-	unsigned long address, usb_bus, dev_id;
+	unsigned int tb_vers;
+	unsigned long address, usb_lid, dev_id;
 	unsigned long usb_port, thun_port;
 	unsigned long tb_bus, tp_bus, ts_bus;
 	unsigned long long frame;
@@ -133,7 +134,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get device locationID for bus number.
 				 */
-				usb_bus = USB_get_device_location_id(&err, devif);
+				usb_lid = USB_get_device_location_id(&err, devif);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next USB device location ID.\n");
@@ -144,7 +145,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Format locationID into hex for strtoul.
 				 */
-				snprintf(bus_buf, 5, "%#lx", usb_bus);
+				snprintf(bus_buf, 5, "%#lx", usb_lid);
 				fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
 
 				/**
@@ -353,10 +354,39 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.2lu", "", 6, thun_port);
 
 				/**
-				 * Placeholders for Power, Speed, and Serial Number.
+				 * Placeholder for Power.
 				 */
 				fprintf(stdout, "%1s%-*s", "", 12, lines);
-				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+
+				tb_vers = THUN_get_port_thunderbolt_version(&err, &port);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt port version.\n");
+				}
+
+				/**
+				 * Show speed rating based on Thunderbolt version.
+				 */
+				switch (tb_vers) {
+					case THUN_V1:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V1_SPEED);
+
+						break;
+					case THUN_V2:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V2_SPEED);
+
+						break;
+					case THUN_V3:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V3_SPEED);
+
+						break;
+					default:
+						fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+				}
+
+				/**
+				 * Placeholder for Serial Number.
+				 */
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
 
 				dev_id = THUN_get_port_device_id(&err, &port);
