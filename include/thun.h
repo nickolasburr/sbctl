@@ -35,6 +35,7 @@
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
 #define kIOThunderboltSwitchDeviceModelNameKey "Device Model Name"
 #define kIOThunderboltSwitchDeviceVendorNameKey "Device Vendor Name"
+#define kIOThunderboltSwitchThunderboltVersionKey "Thunderbolt Version"
 
 typedef struct Bridge_T Bridge_T;
 typedef struct Device_T Device_T;
@@ -114,7 +115,8 @@ void THUN_get_all_switches(int *, Switch_T *);
 void THUN_get_type1_switches(int *, Switch_T *);
 void THUN_get_type2_switches(int *, Switch_T *);
 
-char *THUN_get_switch_name(int *, io_service_t *);
-char *THUN_get_switch_vendor(int *, io_service_t *);
+const char *THUN_get_switch_name(int *, io_service_t *);
+unsigned int THUN_get_switch_thunderbolt_version(int *, io_service_t *);
+const char *THUN_get_switch_vendor(int *, io_service_t *);
 
 #endif /* SBCTL_THUN_H */

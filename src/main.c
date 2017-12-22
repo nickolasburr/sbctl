@@ -26,9 +26,9 @@ int main (int argc, char **argv) {
 	char *thun_type = "pci";
 	char *usb_speed_spec = NULL;
 	char *thun_speed_spec = NULL;
-	char *tb_name = NULL;
-	char *ts_name = NULL;
-	char *ts_vendor = NULL;
+	const char *tb_name = NULL;
+	const char *ts_name = NULL;
+	const char *ts_vendor = NULL;
 	int count, err, index, lindex, power;
 	int usb_speed, thun_speed;
 	unsigned int tb_vers;
@@ -560,10 +560,39 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
 
 				/**
-				 * Placeholders for Power, Speed, Serial Number, and Device ID.
+				 * Placeholder for Power.
 				 */
 				fprintf(stdout, "%1s%-*s", "", 12, lines);
-				fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+
+				tb_vers = THUN_get_switch_thunderbolt_version(&err, &swit);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt switch version.\n");
+				}
+
+				/**
+				 * Show speed rating based on Thunderbolt version.
+				 */
+				switch (tb_vers) {
+					case THUN_V1:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V1_SPEED);
+
+						break;
+					case THUN_V2:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V2_SPEED);
+
+						break;
+					case THUN_V3:
+						fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V3_SPEED);
+
+						break;
+					default:
+						fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+				}
+
+				/**
+				 * Placeholders for Serial Number, and Device ID.
+				 */
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
 
