@@ -165,9 +165,9 @@ on_error:
 /**
  * Get port description.
  */
-char *THUN_get_port_description (int *err, io_service_t *port) {
+const char *THUN_get_port_description (int *err, io_service_t *port) {
 	char desc_buf[256];
-	char *desc_ptr = NULL;
+	const char *desc_ptr = NULL;
 	CFTypeRef cf_obj;
 	CFMutableDictionaryRef dict;
 	kern_return_t status;
@@ -259,6 +259,39 @@ unsigned long THUN_get_port_bus_number (int *err, io_service_t *port) {
 	CFRelease(cf_data);
 
 	return (unsigned long) data_buf[2];
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get port version.
+ */
+unsigned int THUN_get_port_thunderbolt_version (int *err, io_service_t *port) {
+	unsigned int tb_vers;
+	CFNumberRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(*port, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltPortThunderboltVersionKey));
+
+	if (!(cf_obj && CFNumberGetValue(cf_obj, kCFNumberIntType, &tb_vers))) {
+		goto on_error;
+	}
+
+	CFRelease(cf_obj);
+
+	return tb_vers;
 
 on_error:
 	*err = 1;
