@@ -552,10 +552,19 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
 				fprintf(stdout, "%1s%-*.4s", "", 6, "switch");
 
+				ts_bus = THUN_get_switch_bus_number(&err, &swit);
+
+				if (err) {
+					fprintf(stderr, "Error: Could not get next Thunderbolt switch bus number.\n");
+
+					exit(EXIT_FAILURE);
+				}
+
+				fprintf(stdout, "%1s%-*.3lu", "", 5, ts_bus);
+
 				/**
-				 * Placeholder for Bus, Address, Port.
+				 * Placeholder for Address, Port.
 				 */
-				fprintf(stdout, "%1s%-*.3s", "", 5, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
 

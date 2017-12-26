@@ -115,6 +115,7 @@ void THUN_get_all_switches(int *, Switch_T *);
 void THUN_get_type1_switches(int *, Switch_T *);
 void THUN_get_type2_switches(int *, Switch_T *);
 
+unsigned long THUN_get_switch_bus_number(int *, io_service_t *);
 const char *THUN_get_switch_name(int *, io_service_t *);
 unsigned int THUN_get_switch_thunderbolt_version(int *, io_service_t *);
 const char *THUN_get_switch_vendor(int *, io_service_t *);
