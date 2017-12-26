@@ -619,6 +619,75 @@ on_error:
 }
 
 /**
+ * Get bus number of Thunderbolt switch.
+ */
+unsigned long THUN_get_switch_bus_number (int *err, io_service_t *swit) {
+	unsigned char *data_buf = NULL;
+	unsigned long total_bytes;
+	CFMutableDictionaryRef dict;
+	CFDataRef cf_data;
+	io_iterator_t iter;
+	io_service_t controller;
+	kern_return_t status;
+
+	*err = 0;
+
+	dict = IOServiceNameMatching(kIOThunderboltPortNativeHostInterfaceName);
+
+	if (is_null(dict)) {
+		goto on_error;
+	}
+
+	status = IOServiceGetMatchingServices(kIOMasterPortDefault, dict, &iter);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	if (!(controller = IOIteratorNext(iter))) {
+		goto on_error;
+	}
+
+	status = IORegistryEntryCreateCFProperties(controller, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	/**
+	 * Iterate through parent entries and
+	 * look for the controlling PCI bus.
+	 */
+	cf_data = (CFDataRef) CFDictionaryGetValue(dict, CFSTR(kIOPCIBridgeBusRegisterKey));
+
+	if (!cf_data) {
+		goto on_error;
+	}
+
+	/**
+	 * Get length of raw bytes.
+	 */
+	total_bytes = CFDataGetLength(cf_data);
+
+	/**
+	 * Alloc based on # of raw bytes (various registers have different
+	 * thresholds), and store the raw bytes in our data buffer array.
+	 */
+	data_buf = ALLOC(sizeof(data_buf) * total_bytes);
+	CFDataGetBytes(cf_data, CFRangeMake(0, total_bytes), data_buf);
+
+	IOObjectRelease(iter);
+	CFRelease(cf_data);
+
+	return (unsigned long) data_buf[2];
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
  * Get switch name.
  */
 const char *THUN_get_switch_name (int *err, io_service_t *swit) {
