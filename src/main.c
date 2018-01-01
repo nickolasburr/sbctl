@@ -340,7 +340,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3lu", "", 5, THUN_get_port_bus_number(&err, &port));
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 
-				thun_port = THUN_get_port_number(&err, &port);
+				thun_port = THUN_get_port_port_number(&err, &port);
 
 				if (err) {
 					fprintf(stderr, "Error: Could not get next Thunderbolt port number.\n");
