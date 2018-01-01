@@ -101,7 +101,7 @@ void THUN_get_ports(int *, Port_T *);
 unsigned long THUN_get_port_bus_number(int *, io_service_t *);
 const char *THUN_get_port_description(int *, io_service_t *);
 unsigned long THUN_get_port_device_id(int *, io_service_t *);
-unsigned long THUN_get_port_number(int *, io_service_t *);
+unsigned long THUN_get_port_port_number(int *, io_service_t *);
 unsigned int THUN_get_port_thunderbolt_version(int *, io_service_t *);
 
 /**

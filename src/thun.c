@@ -97,9 +97,9 @@ on_error:
 }
 
 /**
- * Get port number.
+ * Get port number of Thunderbolt port entity.
  */
-unsigned long THUN_get_port_number (int *err, io_service_t *port) {
+unsigned long THUN_get_port_port_number (int *err, io_service_t *port) {
 	unsigned long port_num;
 	CFNumberRef pn_obj;
 	CFMutableDictionaryRef dict;
