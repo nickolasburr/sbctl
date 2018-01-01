@@ -563,10 +563,14 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3lu", "", 5, ts_bus);
 
 				/**
-				 * Placeholder for Address, Port.
+				 * Placeholder for Address.
 				 */
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
-				fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+
+				thun_port = THUN_get_switch_port_number(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1s%-*.2lu", "", 6, thun_port);
 
 				/**
 				 * Placeholder for Power.
