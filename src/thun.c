@@ -130,7 +130,7 @@ on_error:
 }
 
 /**
- * Get port number.
+ * Get port device ID.
  */
 unsigned long THUN_get_port_device_id (int *err, io_service_t *port) {
 	unsigned long dev_id;
@@ -680,6 +680,39 @@ unsigned long THUN_get_switch_bus_number (int *err, io_service_t *swit) {
 	CFRelease(cf_data);
 
 	return (unsigned long) data_buf[2];
+
+on_error:
+	*err = 1;
+
+	return -1;
+}
+
+/**
+ * Get switch device ID.
+ */
+unsigned long THUN_get_switch_device_id (int *err, io_service_t *swit) {
+	unsigned long dev_id;
+	CFTypeRef cf_obj;
+	CFMutableDictionaryRef dict;
+	kern_return_t status;
+
+	*err = 0;
+
+	status = IORegistryEntryCreateCFProperties(*swit, &dict, kCFAllocatorDefault, kNilOptions);
+
+	if (status != KERN_SUCCESS) {
+		goto on_error;
+	}
+
+	cf_obj = (CFNumberRef) CFDictionaryGetValue(dict, CFSTR(kIOThunderboltSwitchDeviceIDKey));
+
+	if (!(cf_obj && CFNumberGetValue(cf_obj, kCFNumberLongType, &dev_id))) {
+		goto on_error;
+	}
+
+	CFRelease(cf_obj);
+
+	return (((unsigned long) dev_id >> 8) & 0xFF);
 
 on_error:
 	*err = 1;

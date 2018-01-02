@@ -33,6 +33,7 @@
 
 #define kIOThunderboltSwitchType1ClassName "IOThunderboltSwitchType1"
 #define kIOThunderboltSwitchType2ClassName "IOThunderboltSwitchType2"
+#define kIOThunderboltSwitchDeviceIDKey "Device ID"
 #define kIOThunderboltSwitchDeviceModelNameKey "Device Model Name"
 #define kIOThunderboltSwitchDeviceVendorNameKey "Device Vendor Name"
 #define kIOThunderboltSwitchUpstreamPortNumberKey "Upstream Port Number"
@@ -117,6 +118,7 @@ void THUN_get_type1_switches(int *, Switch_T *);
 void THUN_get_type2_switches(int *, Switch_T *);
 
 unsigned long THUN_get_switch_bus_number(int *, io_service_t *);
+unsigned long THUN_get_switch_device_id(int *, io_service_t *);
 const char *THUN_get_switch_name(int *, io_service_t *);
 unsigned long THUN_get_switch_port_number(int *, io_service_t *);
 unsigned int THUN_get_switch_thunderbolt_version(int *, io_service_t *);
