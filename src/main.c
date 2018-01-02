@@ -578,10 +578,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*s", "", 12, lines);
 
 				tb_vers = THUN_get_switch_thunderbolt_version(&err, &swit);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt switch version.\n");
-				}
+				assert(!err);
 
 				/**
 				 * Show speed rating based on Thunderbolt version.
@@ -604,26 +601,31 @@ int main (int argc, char **argv) {
 				}
 
 				/**
-				 * Placeholders for Serial Number, and Device ID.
+				 * Placeholder for Serial Number.
 				 */
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
-				fprintf(stdout, "%1s%-*.3s", "", 12, lines);
 
+				/**
+				 * Get PCI Thunderbolt device ID.
+				 */
+				dev_id = THUN_get_switch_device_id(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
+
+				/**
+				 * Get PCI Thunderbolt switch vendor.
+				 */
 				ts_vendor = THUN_get_switch_vendor(&err, &swit);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt switch vendor name.\n");
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.5s", "", 8, ts_vendor);
 
+				/**
+				 * Get PCI Thunderbolt switch name.
+				 */
 				ts_name = THUN_get_switch_name(&err, &swit);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt switch model name.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, ts_name);
 
