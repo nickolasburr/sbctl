@@ -60,6 +60,69 @@ int main (int argc, char **argv) {
 	count = 0;
 
 	/**
+	 *
+	 * Universal Serial Bus
+	 *
+	 */
+
+	/**
+	 * USB devices, buses, hubs, etc.
+	 */
+	usbif = ALLOC(sizeof(usbif));
+	usbif->length = USB_get_total_devices(&err);
+	assert(!err);
+
+	usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
+
+	/**
+	 * Get USB devices, set usbif->devices[index].
+	 */
+	USB_get_devices(&err, usbif->devices);
+	assert(!err);
+
+	/**
+	 *
+	 * PCI, Thunderbolt
+	 *
+	 */
+
+	/**
+	 * Thunderbolt ports.
+	 */
+	ports = ALLOC(sizeof(ports));
+	ports->length = THUN_get_total_ports(&err);
+	assert(!err);
+
+	ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
+
+	THUN_get_ports(&err, ports);
+	assert(!err);
+
+	/**
+	 * PCI-PCI Thunderbolt bridges.
+	 */
+	bridges = ALLOC(sizeof(bridges));
+	bridges->length = THUN_get_total_bridges(&err);
+	assert(!err);
+
+	bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
+
+	THUN_get_bridges(&err, bridges);
+	assert(!err);
+
+	/**
+	 * Thunderbolt switches.
+	 */
+	switches = ALLOC(sizeof(switches));
+	switches->length = THUN_get_total_all_switches(&err);
+	assert(!err);
+
+	switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
+
+	THUN_get_all_switches(&err, switches);
+	assert(!err);
+
+	/**
 	 * Handle commands, options based on bitmask.
 	 */
 	switch (ARGV_get_command_bitmask(cmd_arg)) {
@@ -67,23 +130,11 @@ int main (int argc, char **argv) {
 		 * 1. sbctl list, ls [OPTIONS]
 		 */
 		case MASK_CMD_LIST:
-			/**
-			 * USB hubs, buses, etc.
-			 */
-			usbif = ALLOC(sizeof(usbif));
-			usbif->length = USB_get_total_devices(&err);
-			assert(!err);
-
-			usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
-
-			/**
-			 * Get USB devices, set usbif->devices[index].
-			 */
-			USB_get_devices(&err, usbif->devices);
-			assert(!err);
-
 			fprintf(stdout, LIST_HEADER);
 
+			/**
+			 * List USB devices, buses, hubs, etc.
+			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				/**
 				 * Get device object.
@@ -98,16 +149,15 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "|");
 
+				/**
+				 * List entry index.
+				 */
 				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
 
 				/**
-				 * USB spec.
+				 * USB spec, mode.
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
-
-				/**
-				 * ex., Mode: USB.
-				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_mode);
 
 				/**
@@ -198,9 +248,7 @@ int main (int argc, char **argv) {
 				vendor = USB_get_device_vendor_name(&err, &device);
 				assert(!err);
 
-				if (is_null(vendor)) {
-					vendor = lines;
-				}
+				vendor = !is_null(vendor) ? vendor : lines;
 
 				/**
 				 * ex., Vendor: Apple
@@ -210,10 +258,11 @@ int main (int argc, char **argv) {
 				product = USB_get_device_product_name(&err, &device);
 				assert(!err);
 
-				if (is_null(product)) {
-					product = lines;
-				}
+				product = !is_null(product) ? product : lines;
 
+				/**
+				 * ex., Product Description: Apple Keyboard
+				 */
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
 				fprintf(stdout, "|");
@@ -226,26 +275,8 @@ int main (int argc, char **argv) {
 				(*devif)->Release(devif);
 			}
 
-			FREE(usbif->devices);
-			FREE(usbif);
-
 			/**
-			 * PCI, Thunderbolt.
-			 */
-
-			ports = ALLOC(sizeof(ports));
-			ports->length = THUN_get_total_ports(&err);
-			assert(!err);
-
-			ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
-
-			/**
-			 * Get Thunderbolt ports.
-			 */
-			THUN_get_ports(&err, ports);
-
-			/**
-			 * List PCI entities using Thunderbolt.
+			 * List Thunderbolt ports.
 			 */
 			for (index = 0; index < ports->length; index += 1) {
 				/**
@@ -340,20 +371,6 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "\n");
 			}
 
-			FREE(ports->ports);
-			FREE(ports);
-
-			bridges = ALLOC(sizeof(bridges));
-			bridges->length = THUN_get_total_bridges(&err);
-			assert(!err);
-
-			bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
-
-			/**
-			 * Get Thunderbolt ports.
-			 */
-			THUN_get_bridges(&err, bridges);
-
 			/**
 			 * List PCI-PCI Thunderbolt bridges.
 			 */
@@ -415,20 +432,6 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "\n");
 			}
-
-			FREE(bridges->bridges);
-			FREE(bridges);
-
-			switches = ALLOC(sizeof(switches));
-			switches->length = THUN_get_total_all_switches(&err);
-			assert(!err);
-
-			switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
-
-			/**
-			 * Get Thunderbolt switches.
-			 */
-			THUN_get_all_switches(&err, switches);
 
 			/**
 			 * List Thunderbolt switches.
@@ -529,9 +532,6 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "\n");
 			}
 
-			FREE(switches->switches);
-			FREE(switches);
-
 			fprintf(stdout, LIST_FOOTER);
 
 			break;
@@ -562,8 +562,16 @@ int main (int argc, char **argv) {
 	}
 
 	/**
-	 * @todo: Add GC tasks, on_error goto.
+	 * Run cleanup tasks.
 	 */
+	FREE(usbif->devices);
+	FREE(usbif);
+	FREE(ports->ports);
+	FREE(ports);
+	FREE(bridges->bridges);
+	FREE(bridges);
+	FREE(switches->switches);
+	FREE(switches);
 
 	return 0;
 }
