@@ -70,15 +70,9 @@ int main (int argc, char **argv) {
 			/**
 			 * USB hubs, buses, etc.
 			 */
-
 			usbif = ALLOC(sizeof(usbif));
 			usbif->length = USB_get_total_devices(&err);
-
-			if (err) {
-				fprintf(stderr, "Error: Could not get total number of USB devices.\n");
-
-				exit(EXIT_FAILURE);
-			}
+			assert(!err);
 
 			usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
 
@@ -86,12 +80,7 @@ int main (int argc, char **argv) {
 			 * Get USB devices, set usbif->devices[index].
 			 */
 			USB_get_devices(&err, usbif->devices);
-
-			if (err) {
-				fprintf(stderr, "Error: Could not get all USB devices.\n");
-
-				exit(EXIT_FAILURE);
-			}
+			assert(!err);
 
 			fprintf(stdout, LIST_HEADER);
 
@@ -105,12 +94,7 @@ int main (int argc, char **argv) {
 				 * Get device interface.
 				 */
 				devif = USB_get_device_interface(&err, &device);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device interface.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "|");
 
@@ -135,12 +119,7 @@ int main (int argc, char **argv) {
 				 * Get device locationID for bus number.
 				 */
 				usb_lid = USB_get_device_location_id(&err, devif);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device location ID.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * Format locationID into hex for strtoul.
@@ -152,12 +131,7 @@ int main (int argc, char **argv) {
 				 * Get device assigned address.
 				 */
 				address = USB_get_device_address(&err, devif);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device address.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * ex., Address: 001
@@ -168,12 +142,7 @@ int main (int argc, char **argv) {
 				 * Get device port number.
 				 */
 				usb_port = USB_get_device_port_number(&err, &device);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB port number.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * ex., Port: 02
@@ -188,12 +157,7 @@ int main (int argc, char **argv) {
 				 * Get bus power available to device.
 				 */
 				power = USB_get_bus_power(&err, devif);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device power.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * ex., Power: 250
@@ -201,20 +165,10 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*d", "", 12, power);
 
 				usb_speed = USB_get_device_speed(&err, devif);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device speed class.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				usb_speed_spec = USB_get_device_speed_as_spec(&err, usb_speed);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device speed specification.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * ex., Speed: 480
@@ -222,12 +176,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.5s", "", 14, usb_speed_spec);
 
 				serial = USB_get_device_serial_number(&err, &device);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device serial number.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				if (is_null(serial)) {
 					serial = lines;
@@ -239,12 +188,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.13s", "", 15, serial);
 
 				dev_id = USB_get_device_id(&err, devif);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device ID.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * ex., Device ID: 016
@@ -252,12 +196,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
 
 				vendor = USB_get_device_vendor_name(&err, &device);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device vendor name.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				if (is_null(vendor)) {
 					vendor = lines;
@@ -269,12 +208,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.6s", "", 8, vendor);
 
 				product = USB_get_device_product_name(&err, &device);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next USB device product name.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				if (is_null(product)) {
 					product = lines;
@@ -301,12 +235,7 @@ int main (int argc, char **argv) {
 
 			ports = ALLOC(sizeof(ports));
 			ports->length = THUN_get_total_ports(&err);
-
-			if (err) {
-				fprintf(stderr, "Error: Could not get total number of Thunderbolt ports.\n");
-
-				exit(EXIT_FAILURE);
-			}
+			assert(!err);
 
 			ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
 
@@ -334,19 +263,18 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
 				fprintf(stdout, "%1s%-*.4s", "", 6, "port");
 
+				tp_bus = THUN_get_port_bus_number(&err, &port);
+				assert(!err);
+
+				fprintf(stdout, "%1s%-*.3lu", "", 5, tp_bus);
+
 				/**
-				 * Placeholder for Bus, Address columns.
+				 * Placeholder for Address.
 				 */
-				fprintf(stdout, "%1s%-*.3lu", "", 5, THUN_get_port_bus_number(&err, &port));
 				fprintf(stdout, "%1s%-*.3s", "", 9, lines);
 
 				thun_port = THUN_get_port_port_number(&err, &port);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt port number.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * Port number.
@@ -359,10 +287,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*s", "", 12, lines);
 
 				tb_vers = THUN_get_port_thunderbolt_version(&err, &port);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt port version.\n");
-				}
+				assert(!err);
 
 				/**
 				 * Show speed rating based on Thunderbolt version.
@@ -390,12 +315,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.13s", "", 15, lines);
 
 				dev_id = THUN_get_port_device_id(&err, &port);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt port device ID.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				/**
 				 * Device ID.
@@ -408,15 +328,9 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 
 				product = THUN_get_port_description(&err, &port);
-
-				if (err) {
-					fprintf(stdout, "Error: Could not get next Thunderbolt port description.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
-
 
 				fprintf(stdout, "|");
 
@@ -431,12 +345,7 @@ int main (int argc, char **argv) {
 
 			bridges = ALLOC(sizeof(bridges));
 			bridges->length = THUN_get_total_bridges(&err);
-
-			if (err) {
-				fprintf(stderr, "Error: Could not get total number of PCI-PCI Thunderbolt bridges.\n");
-
-				exit(EXIT_FAILURE);
-			}
+			assert(!err);
 
 			bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
 
@@ -468,12 +377,7 @@ int main (int argc, char **argv) {
 				 * Get bridge bus number.
 				 */
 				tb_bus = THUN_get_bridge_bus_number(&err, &bridge);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt bridge bus number.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.3lu", "", 5, tb_bus);
 
@@ -500,12 +404,7 @@ int main (int argc, char **argv) {
 				 * Get Thunderbolt bridge name.
 				 */
 				tb_name = THUN_get_bridge_name(&err, &bridge);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt bridge name.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
 
@@ -522,15 +421,13 @@ int main (int argc, char **argv) {
 
 			switches = ALLOC(sizeof(switches));
 			switches->length = THUN_get_total_all_switches(&err);
-
-			if (err) {
-				fprintf(stderr, "Error: Could not get total number of Thunderbolt switches.\n");
-
-				exit(EXIT_FAILURE);
-			}
+			assert(!err);
 
 			switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
 
+			/**
+			 * Get Thunderbolt switches.
+			 */
 			THUN_get_all_switches(&err, switches);
 
 			/**
@@ -553,12 +450,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.4s", "", 6, "switch");
 
 				ts_bus = THUN_get_switch_bus_number(&err, &swit);
-
-				if (err) {
-					fprintf(stderr, "Error: Could not get next Thunderbolt switch bus number.\n");
-
-					exit(EXIT_FAILURE);
-				}
+				assert(!err);
 
 				fprintf(stdout, "%1s%-*.3lu", "", 5, ts_bus);
 
