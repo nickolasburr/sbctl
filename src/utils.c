@@ -8,6 +8,19 @@
 
 /**
  *
+ * Integral utilities
+ *
+ */
+
+/**
+ * Determine if number is in range {start, end}.
+ */
+int in_range (int num, int start, int end) {
+	return ((num >= start) && (num <= end));
+}
+
+/**
+ *
  * String utilities (syntactic sugar, mostly)
  *
  */
