@@ -9,11 +9,13 @@
 volatile int looping = 1;
 
 int main (int argc, char **argv) {
+	char *target = NULL;
 	char bus_buf[5];
 	char *serial = NULL;
 	const char *product = NULL;
 	char *vendor = NULL;
 	char *cmd_arg = NULL;
+	char *opt_arg = NULL;
 	char *lines = "---";
 	char *pci_spec = "pci";
 	char *pci_mode = "pci";
@@ -29,7 +31,7 @@ int main (int argc, char **argv) {
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index, lindex, power;
+	int count, err, index, power;
 	int usb_speed, thun_speed;
 	unsigned int tb_vers;
 	unsigned long address, usb_lid, dev_id;
@@ -44,20 +46,24 @@ int main (int argc, char **argv) {
 	Bridge_T *bridges;
 	Switch_T *switches;
 
-	lindex = (argc - 1);
+	/**
+	 * Name of executable (sbctl).
+	 */
+	target = argv[0];
 
-	if (!lindex) {
+	/**
+	 * When sbctl is given with no arguments.
+	 */
+	if (!(argc - 1)) {
 		ARGV_usage();
 
 		exit(EXIT_FAILURE);
 	}
 
 	/**
-	 * @todo: Add command, option, option argument[s] validation.
+	 * Command given to sbctl (i.e. sbctl ls, sbctl get, etc).
 	 */
-	cmd_arg = argv[lindex];
-
-	count = 0;
+	cmd_arg = argv[1];
 
 	/**
 	 *
@@ -72,7 +78,7 @@ int main (int argc, char **argv) {
 	usbif->length = USB_get_total_devices(&err);
 	assert(!err);
 
-	usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
+	usbif->devices = ALLOC(sizeof(usbif->devices) * usbif->length);
 
 	/**
 	 * Get USB devices, set usbif->devices[index].
@@ -93,7 +99,7 @@ int main (int argc, char **argv) {
 	ports->length = THUN_get_total_ports(&err);
 	assert(!err);
 
-	ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
+	ports->ports = ALLOC(sizeof(ports->ports) * ports->length);
 
 	THUN_get_ports(&err, ports);
 	assert(!err);
@@ -105,7 +111,7 @@ int main (int argc, char **argv) {
 	bridges->length = THUN_get_total_bridges(&err);
 	assert(!err);
 
-	bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
+	bridges->bridges = ALLOC(sizeof(bridges->bridges) * bridges->length);
 
 	THUN_get_bridges(&err, bridges);
 	assert(!err);
@@ -117,7 +123,7 @@ int main (int argc, char **argv) {
 	switches->length = THUN_get_total_all_switches(&err);
 	assert(!err);
 
-	switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
+	switches->switches = ALLOC(sizeof(switches->switches) * switches->length);
 
 	THUN_get_all_switches(&err, switches);
 	assert(!err);
@@ -133,29 +139,26 @@ int main (int argc, char **argv) {
 			fprintf(stdout, LIST_HEADER);
 
 			/**
+			 * Entry index counter.
+			 */
+			count = 0;
+
+			/**
 			 * List USB devices, buses, hubs, etc.
 			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				/**
-				 * Get device object.
+				 * Get device object, interface.
 				 */
 				device = usbif->devices[index];
-
-				/**
-				 * Get device interface.
-				 */
 				devif = USB_get_device_interface(&err, &device);
 				assert(!err);
 
 				fprintf(stdout, "|");
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
-				 * List entry index.
-				 */
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
-
-				/**
-				 * USB spec, mode.
+				 * USB Spec, Mode.
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_mode);
@@ -228,9 +231,7 @@ int main (int argc, char **argv) {
 				serial = USB_get_device_serial_number(&err, &device);
 				assert(!err);
 
-				if (is_null(serial)) {
-					serial = lines;
-				}
+				serial = !is_null(serial) ? serial : lines;
 
 				/**
 				 * ex., Serial: 00000000
@@ -265,12 +266,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 
 				(*devif)->Release(devif);
 			}
@@ -285,7 +281,7 @@ int main (int argc, char **argv) {
 				port = ports->ports[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -363,12 +359,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			/**
@@ -381,7 +372,7 @@ int main (int argc, char **argv) {
 				bridge = bridges->bridges[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -425,12 +416,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			/**
@@ -443,7 +429,7 @@ int main (int argc, char **argv) {
 				swit = switches->switches[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -524,12 +510,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, ts_name);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			fprintf(stdout, LIST_FOOTER);
@@ -541,7 +522,27 @@ int main (int argc, char **argv) {
 		 * @todo: Build out get functionality.
 		 */
 		case MASK_CMD_GET:
-			fprintf(stdout, "Information for device.\n");
+			/**
+			 * Entry index number given as command argument.
+			 */
+			opt_arg = argv[2];
+
+			if (is_null(opt_arg)) {
+				fprintf(stderr, "'%s %s' requires an entry index number.\n", target, cmd_arg);
+
+				exit(EXIT_FAILURE);
+			}
+
+			/**
+			 * Entry index numbers need to be prefixed with % sign.
+			 */
+			if (opt_arg[0] != ASCII_PERCENT) {
+				fprintf(stderr, "Invalid format given as argument to '%s %s'\n", target, cmd_arg);
+
+				exit(EXIT_FAILURE);
+			}
+
+			fprintf(stdout, "Showing information for entry %s\n", opt_arg);
 
 			break;
 		/**
