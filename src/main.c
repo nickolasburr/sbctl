@@ -137,25 +137,17 @@ int main (int argc, char **argv) {
 			 */
 			for (index = 0; index < usbif->length; index += 1) {
 				/**
-				 * Get device object.
+				 * Get device object, interface.
 				 */
 				device = usbif->devices[index];
-
-				/**
-				 * Get device interface.
-				 */
 				devif = USB_get_device_interface(&err, &device);
 				assert(!err);
 
 				fprintf(stdout, "|");
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
-				 * List entry index.
-				 */
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
-
-				/**
-				 * USB spec, mode.
+				 * USB Spec, Mode.
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
 				fprintf(stdout, "%1s%-*.4s", "", 6, usb_mode);
@@ -285,7 +277,7 @@ int main (int argc, char **argv) {
 				port = ports->ports[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -381,7 +373,7 @@ int main (int argc, char **argv) {
 				bridge = bridges->bridges[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
@@ -443,7 +435,7 @@ int main (int argc, char **argv) {
 				swit = switches->switches[index];
 
 				fprintf(stdout, "|");
-				fprintf(stdout, "%1s%-*.3d", "", 5, count++);
+				fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 				/**
 				 * Thunderbolt Spec, Mode, Type.
