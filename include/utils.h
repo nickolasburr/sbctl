@@ -16,6 +16,11 @@
 #define is_null(ptr) ((ptr) == ((void *) 0))
 
 /**
+ * Integral utilities
+ */
+int in_range(int, int, int);
+
+/**
  * String utilities
  */
 
