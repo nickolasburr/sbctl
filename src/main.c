@@ -9,11 +9,13 @@
 volatile int looping = 1;
 
 int main (int argc, char **argv) {
+	char *target = NULL;
 	char bus_buf[5];
 	char *serial = NULL;
 	const char *product = NULL;
 	char *vendor = NULL;
 	char *cmd_arg = NULL;
+	char *opt_arg = NULL;
 	char *lines = "---";
 	char *pci_spec = "pci";
 	char *pci_mode = "pci";
@@ -29,7 +31,7 @@ int main (int argc, char **argv) {
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index, lindex, power;
+	int count, err, index, power;
 	int usb_speed, thun_speed;
 	unsigned int tb_vers;
 	unsigned long address, usb_lid, dev_id;
@@ -44,20 +46,24 @@ int main (int argc, char **argv) {
 	Bridge_T *bridges;
 	Switch_T *switches;
 
-	lindex = (argc - 1);
+	/**
+	 * Name of executable (sbctl).
+	 */
+	target = argv[0];
 
-	if (!lindex) {
+	/**
+	 * When sbctl is given with no arguments.
+	 */
+	if (!(argc - 1)) {
 		ARGV_usage();
 
 		exit(EXIT_FAILURE);
 	}
 
 	/**
-	 * @todo: Add command, option, option argument[s] validation.
+	 * Command given to sbctl (i.e. sbctl ls, sbctl get, etc).
 	 */
-	cmd_arg = argv[lindex];
-
-	count = 0;
+	cmd_arg = argv[1];
 
 	/**
 	 *
@@ -131,6 +137,11 @@ int main (int argc, char **argv) {
 		 */
 		case MASK_CMD_LIST:
 			fprintf(stdout, LIST_HEADER);
+
+			/**
+			 * Entry index counter.
+			 */
+			count = 0;
 
 			/**
 			 * List USB devices, buses, hubs, etc.
@@ -511,7 +522,27 @@ int main (int argc, char **argv) {
 		 * @todo: Build out get functionality.
 		 */
 		case MASK_CMD_GET:
-			fprintf(stdout, "Information for device.\n");
+			/**
+			 * Entry index number given as command argument.
+			 */
+			opt_arg = argv[2];
+
+			if (is_null(opt_arg)) {
+				fprintf(stderr, "'%s %s' requires an entry index number.\n", target, cmd_arg);
+
+				exit(EXIT_FAILURE);
+			}
+
+			/**
+			 * Entry index numbers need to be prefixed with % sign.
+			 */
+			if (opt_arg[0] != ASCII_PERCENT) {
+				fprintf(stderr, "Invalid format given as argument to '%s %s'\n", target, cmd_arg);
+
+				exit(EXIT_FAILURE);
+			}
+
+			fprintf(stdout, "Showing information for entry %s\n", opt_arg);
 
 			break;
 		/**
