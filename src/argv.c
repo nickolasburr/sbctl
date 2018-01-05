@@ -15,15 +15,33 @@ static Command_T commands[] = {
 	},
 	{
 		"get",
-		NULL,
-		"Get information specific to device.",
+		"show",
+		"Get information about device.",
 		MASK_CMD_GET,
 	},
 	{
 		"set",
 		NULL,
-		"Set, modify properties of specific device.",
+		"Set, modify properties of device.",
 		MASK_CMD_SET,
+	},
+	{
+		"unset",
+		NULL,
+		"Remove properties from device.",
+		MASK_CMD_UNSET,
+	},
+	{
+		"help",
+		NULL,
+		"Show usage information.",
+		MASK_CMD_HELP,
+	},
+	{
+		"version",
+		NULL,
+		"Show current release version.",
+		MASK_CMD_VERS,
 	},
 };
 
@@ -91,8 +109,8 @@ void ARGV_usage (void) {
 			space = "";
 		}
 
-		fprintf(stdout, "%4s%-3s%s%s: %-24s\n", "", fvalue, space, command->alias, command->desc);
+		fprintf(stdout, "%4s%-s%s%s: %-24s\n", "", fvalue, space, command->alias, command->desc);
 	}
 
-	fprintf(stdout, "\nFor a list of specific command options: sbctl <COMMAND> [-h|--help]\n");
+	fprintf(stdout, "\nFor a list of command-specific options: sbctl <COMMAND> [-h|--help]\n");
 }
