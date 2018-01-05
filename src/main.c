@@ -554,6 +554,20 @@ int main (int argc, char **argv) {
 			fprintf(stdout, "Setting properties on device.\n");
 
 			break;
+		/**
+		 * 4. sbctl help
+		 */
+		case MASK_CMD_HELP:
+			ARGV_usage();
+
+			break;
+		/**
+		 * 5. sbctl version
+		 */
+		case MASK_CMD_VERS:
+			fprintf(stdout, "%s\n", SBCTL_VERSION);
+
+			break;
 		default:
 			fprintf(stderr, "Invalid option %s\n\n", cmd_arg);
 

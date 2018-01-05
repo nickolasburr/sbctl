@@ -11,16 +11,17 @@
 #include "error.h"
 #include "utils.h"
 
-#define NUM_CMDS 3
+#define NUM_CMDS 6
 
 /**
  * Hex masks for commands, options.
  */
-#define MASK_CMD_HELP 0x1
-#define MASK_CMD_VERS 0x2
-#define MASK_CMD_LIST 0x4
-#define MASK_CMD_GET  0x8
-#define MASK_CMD_SET  0x10
+#define MASK_CMD_HELP  0x1
+#define MASK_CMD_VERS  0x2
+#define MASK_CMD_LIST  0x4
+#define MASK_CMD_GET   0x8
+#define MASK_CMD_SET   0x10
+#define MASK_CMD_UNSET 0x20
 
 /**
  * ASCII character codes.
