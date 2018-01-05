@@ -72,7 +72,7 @@ int main (int argc, char **argv) {
 	usbif->length = USB_get_total_devices(&err);
 	assert(!err);
 
-	usbif->devices = ALLOC(sizeof(io_service_t *) * usbif->length);
+	usbif->devices = ALLOC(sizeof(usbif->devices) * usbif->length);
 
 	/**
 	 * Get USB devices, set usbif->devices[index].
@@ -93,7 +93,7 @@ int main (int argc, char **argv) {
 	ports->length = THUN_get_total_ports(&err);
 	assert(!err);
 
-	ports->ports = ALLOC(sizeof(io_service_t *) * ports->length);
+	ports->ports = ALLOC(sizeof(ports->ports) * ports->length);
 
 	THUN_get_ports(&err, ports);
 	assert(!err);
@@ -105,7 +105,7 @@ int main (int argc, char **argv) {
 	bridges->length = THUN_get_total_bridges(&err);
 	assert(!err);
 
-	bridges->bridges = ALLOC(sizeof(io_service_t *) * bridges->length);
+	bridges->bridges = ALLOC(sizeof(bridges->bridges) * bridges->length);
 
 	THUN_get_bridges(&err, bridges);
 	assert(!err);
@@ -117,7 +117,7 @@ int main (int argc, char **argv) {
 	switches->length = THUN_get_total_all_switches(&err);
 	assert(!err);
 
-	switches->switches = ALLOC(sizeof(io_service_t *) * switches->length);
+	switches->switches = ALLOC(sizeof(switches->switches) * switches->length);
 
 	THUN_get_all_switches(&err, switches);
 	assert(!err);
@@ -220,9 +220,7 @@ int main (int argc, char **argv) {
 				serial = USB_get_device_serial_number(&err, &device);
 				assert(!err);
 
-				if (is_null(serial)) {
-					serial = lines;
-				}
+				serial = !is_null(serial) ? serial : lines;
 
 				/**
 				 * ex., Serial: 00000000
@@ -257,12 +255,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 
 				(*devif)->Release(devif);
 			}
@@ -355,12 +348,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			/**
@@ -417,12 +405,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			/**
@@ -516,12 +499,7 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%-*.19s", "", 20, ts_name);
 
-				fprintf(stdout, "|");
-
-				/**
-				 * Add trailing newline.
-				 */
-				fprintf(stdout, "\n");
+				fprintf(stdout, "|\n");
 			}
 
 			fprintf(stdout, LIST_FOOTER);
