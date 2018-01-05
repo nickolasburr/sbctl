@@ -22,6 +22,11 @@
 #define MASK_CMD_GET  0x8
 #define MASK_CMD_SET  0x10
 
+/**
+ * ASCII character codes.
+ */
+#define ASCII_PERCENT 37
+
 typedef struct {
 	char *value;
 	char *alias;
