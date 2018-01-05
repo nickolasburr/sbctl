@@ -10,6 +10,7 @@ volatile int looping = 1;
 
 int main (int argc, char **argv) {
 	char *target = NULL;
+	char number, numbers[5];
 	char bus_buf[5];
 	char *serial = NULL;
 	const char *product = NULL;
@@ -32,6 +33,7 @@ int main (int argc, char **argv) {
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
 	int count, err, index, power;
+	int start, end, entry, total_entries;
 	int usb_speed, thun_speed;
 	unsigned int tb_vers;
 	unsigned long address, usb_lid, dev_id;
@@ -61,9 +63,14 @@ int main (int argc, char **argv) {
 	}
 
 	/**
-	 * Command given to sbctl (i.e. sbctl ls, sbctl get, etc).
+	 * Top-level command given to sbctl (i.e. ls, get, unset, etc).
 	 */
 	cmd_arg = argv[1];
+
+	/**
+	 * Tally total number of entries across all types.
+	 */
+	total_entries = 0;
 
 	/**
 	 *
@@ -80,11 +87,10 @@ int main (int argc, char **argv) {
 
 	usbif->devices = ALLOC(sizeof(usbif->devices) * usbif->length);
 
-	/**
-	 * Get USB devices, set usbif->devices[index].
-	 */
 	USB_get_devices(&err, usbif->devices);
 	assert(!err);
+
+	total_entries += usbif->length;
 
 	/**
 	 *
@@ -104,6 +110,8 @@ int main (int argc, char **argv) {
 	THUN_get_ports(&err, ports);
 	assert(!err);
 
+	total_entries += ports->length;
+
 	/**
 	 * PCI-PCI Thunderbolt bridges.
 	 */
@@ -116,6 +124,8 @@ int main (int argc, char **argv) {
 	THUN_get_bridges(&err, bridges);
 	assert(!err);
 
+	total_entries += bridges->length;
+
 	/**
 	 * Thunderbolt switches.
 	 */
@@ -127,6 +137,8 @@ int main (int argc, char **argv) {
 
 	THUN_get_all_switches(&err, switches);
 	assert(!err);
+
+	total_entries += switches->length;
 
 	/**
 	 * Handle commands, options based on bitmask.
@@ -522,6 +534,8 @@ int main (int argc, char **argv) {
 		 * @todo: Build out get functionality.
 		 */
 		case MASK_CMD_GET:
+			index = 0;
+
 			/**
 			 * Entry index number given as command argument.
 			 */
@@ -536,13 +550,99 @@ int main (int argc, char **argv) {
 			/**
 			 * Entry index numbers need to be prefixed with % sign.
 			 */
-			if (opt_arg[0] != ASCII_PERCENT) {
+			if (opt_arg[index] != ASCII_PERCENT) {
 				fprintf(stderr, "Invalid format given as argument to '%s %s'\n", target, cmd_arg);
 
 				exit(EXIT_FAILURE);
 			}
 
-			fprintf(stdout, "Showing information for entry %s\n", opt_arg);
+			/**
+			 * Get up to the first five chars from opt_arg,
+			 * and copy its contents to numbers char array.
+			 */
+			while ((length(numbers) < (index + 1)) && (number = opt_arg[(index + 1)])) {
+				numbers[index++] = number;
+			}
+
+			numbers[index] = '\0';
+
+			/**
+			 * Verify numbers represents valid integer.
+			 */
+			if (!is_numeric(numbers)) {
+				fprintf(stderr, "%s is not a valid number.\n", numbers);
+
+				exit(EXIT_FAILURE);
+			}
+
+			/**
+			 * Get the actual entry index, as an integer.
+			 */
+			entry = (int) strtol(numbers, NULL, 0);
+
+			/**
+			 * Verify entry is in range {1, total_entries}.
+			 */
+			if (!((entry > 0) && (entry <= total_entries))) {
+				fprintf(stderr, "Invalid entry index %s\n", numbers);
+
+				exit(EXIT_FAILURE);
+			}
+
+			fprintf(stdout, "Showing information for entry #%s.\n", numbers);
+
+			start = 0;
+			end = (usbif->length - 1);
+
+			/**
+			 * If entry type is USB.
+			 */
+			if (in_range((entry - 1), start, end)) {
+				fprintf(stdout, "Requested device is USB.\n");
+
+				break;
+			}
+
+			start = (end + 1);
+			end = ((start + ports->length) - 1);
+
+			/**
+			 * If entry type is Thunderbolt port.
+			 */
+			if (in_range((entry - 1), start, end)) {
+				fprintf(stdout, "Requested device is Thunderbolt port.\n");
+
+				break;
+			}
+
+			start = (end + 1);
+			end = ((start + bridges->length) - 1);
+
+			/**
+			 * If entry type is Thunderbolt bridge.
+			 */
+			if (in_range((entry - 1), start, end)) {
+				fprintf(stdout, "Requested device is Thunderbolt bridge.\n");
+
+				break;
+			}
+
+			start = (end + 1);
+			end = ((start + switches->length) - 1);
+
+			/**
+			 * If entry type is Thunderbolt switch.
+			 */
+			if (in_range((entry - 1), start, end)) {
+				fprintf(stdout, "Requested device is Thunderbolt switch.\n");
+
+				break;
+			}
+
+			/**
+			 * Should never end up here.
+			 */
+			fprintf(stdout, "Requested device is Unknown.\n");
 
 			break;
 		/**
