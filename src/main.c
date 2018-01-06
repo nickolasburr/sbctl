@@ -297,7 +297,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-				fprintf(stdout, "%1s%-*.4s", "", 6, "port");
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_port_type);
 
 				tp_bus = THUN_get_port_bus_number(&err, &port);
 				assert(!err);
@@ -388,7 +388,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-				fprintf(stdout, "%1s%-*.4s", "", 6, "bridge");
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_brid_type);
 
 				/**
 				 * Get bridge bus number.
@@ -445,7 +445,7 @@ int main (int argc, char **argv) {
 				 */
 				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-				fprintf(stdout, "%1s%-*.4s", "", 6, "switch");
+				fprintf(stdout, "%1s%-*.4s", "", 6, thun_swit_type);
 
 				ts_bus = THUN_get_switch_bus_number(&err, &swit);
 				assert(!err);
@@ -594,6 +594,19 @@ int main (int argc, char **argv) {
 			 * USB entry type.
 			 */
 			if (in_range(index, start, end)) {
+				/**
+				 * Get device object, interface.
+				 */
+				device = usbif->devices[index];
+				devif = USB_get_device_interface(&err, &device);
+				assert(!err);
+
+				product = USB_get_device_product_name(&err, &device);
+				assert(!err);
+
+				product = !is_null(product) ? product : lines;
+
+				fprintf(stdout, "%s\n\n", product);
 				fprintf(stdout, "Spec: %s\n", usb_smt);
 				fprintf(stdout, "Mode: %s\n", usb_smt);
 				fprintf(stdout, "Type: %s\n", lines);
@@ -608,6 +621,19 @@ int main (int argc, char **argv) {
 			 * Thunderbolt port entry type.
 			 */
 			if (in_range(index, start, end)) {
+				index = ((entry - start) - 1);
+
+				/**
+				 * Get port object.
+				 */
+				port = ports->ports[index];
+
+				product = THUN_get_port_description(&err, &port);
+				assert(!err);
+
+				product = !is_null(product) ? product : lines;
+
+				fprintf(stdout, "%s\n\n", product);
 				fprintf(stdout, "Spec: %s\n", pci_smt);
 				fprintf(stdout, "Mode: %s\n", thun_mode);
 				fprintf(stdout, "Type: %s\n", thun_port_type);
@@ -622,6 +648,20 @@ int main (int argc, char **argv) {
 			 * Thunderbolt bridge entry type.
 			 */
 			if (in_range(index, start, end)) {
+				index = ((entry - start) - 1);
+
+				/**
+				 * Get bridge object.
+				 */
+				bridge = bridges->bridges[index];
+
+				/**
+				 * Get Thunderbolt bridge name.
+				 */
+				tb_name = THUN_get_bridge_name(&err, &bridge);
+				assert(!err);
+
+				fprintf(stdout, "%s\n\n", tb_name);
 				fprintf(stdout, "Spec: %s\n", pci_smt);
 				fprintf(stdout, "Mode: %s\n", thun_mode);
 				fprintf(stdout, "Type: %s\n", thun_brid_type);
@@ -636,6 +676,20 @@ int main (int argc, char **argv) {
 			 * Thunderbolt switch entry type.
 			 */
 			if (in_range(index, start, end)) {
+				index = ((entry - start) - 1);
+
+				/**
+				 * Get switch object.
+				 */
+				swit = switches->switches[index];
+
+				/**
+				 * Get PCI Thunderbolt switch name.
+				 */
+				ts_name = THUN_get_switch_name(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%s\n\n", ts_name);
 				fprintf(stdout, "Spec: %s\n", pci_smt);
 				fprintf(stdout, "Mode: %s\n", thun_mode);
 				fprintf(stdout, "Type: %s\n", thun_swit_type);
