@@ -18,15 +18,12 @@ int main (int argc, char **argv) {
 	char *cmd_arg = NULL;
 	char *opt_arg = NULL;
 	char *lines = "---";
-	char *pci_spec = "pci";
-	char *pci_mode = "pci";
-	char *pci_type = "pci";
-	char *usb_spec = "usb";
-	char *usb_mode = "usb";
-	char *usb_type = "usb";
-	char *thun_spec = "pci";
+	char *pci_smt = "pci";
+	char *usb_smt = "usb";
 	char *thun_mode = "thun";
-	char *thun_type = "pci";
+	char *thun_port_type = "port";
+	char *thun_brid_type = "bridge";
+	char *thun_swit_type = "switch";
 	char *usb_speed_spec = NULL;
 	char *thun_speed_spec = NULL;
 	const char *tb_name = NULL;
@@ -172,8 +169,8 @@ int main (int argc, char **argv) {
 				/**
 				 * USB Spec, Mode.
 				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, usb_spec);
-				fprintf(stdout, "%1s%-*.4s", "", 6, usb_mode);
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_smt);
+				fprintf(stdout, "%1s%-*.4s", "", 6, usb_smt);
 
 				/**
 				 * Placeholder for Type (device, hub, bridge, etc.)
@@ -298,7 +295,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Thunderbolt Spec, Mode, Type.
 				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
+				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
 				fprintf(stdout, "%1s%-*.4s", "", 6, "port");
 
@@ -389,7 +386,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Thunderbolt Spec, Mode, Type.
 				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
+				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
 				fprintf(stdout, "%1s%-*.4s", "", 6, "bridge");
 
@@ -446,7 +443,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Thunderbolt Spec, Mode, Type.
 				 */
-				fprintf(stdout, "%1s%-*.4s", "", 6, thun_spec);
+				fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
 				fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
 				fprintf(stdout, "%1s%-*.4s", "", 6, "switch");
 
@@ -583,22 +580,23 @@ int main (int argc, char **argv) {
 			/**
 			 * Verify entry is in range {1, total_entries}.
 			 */
-			if (!((entry > 0) && (entry <= total_entries))) {
+			if (!((entry >= 1) && (entry <= total_entries))) {
 				fprintf(stderr, "Invalid entry index %s\n", numbers);
 
 				exit(EXIT_FAILURE);
 			}
 
-			fprintf(stdout, "Showing information for entry #%s.\n", numbers);
-
+			index = (entry - 1);
 			start = 0;
 			end = (usbif->length - 1);
 
 			/**
-			 * If entry type is USB.
+			 * USB entry type.
 			 */
-			if (in_range((entry - 1), start, end)) {
-				fprintf(stdout, "Requested device is USB.\n");
+			if (in_range(index, start, end)) {
+				fprintf(stdout, "Spec: %s\n", usb_smt);
+				fprintf(stdout, "Mode: %s\n", usb_smt);
+				fprintf(stdout, "Type: %s\n", lines);
 
 				break;
 			}
@@ -607,10 +605,12 @@ int main (int argc, char **argv) {
 			end = ((start + ports->length) - 1);
 
 			/**
-			 * If entry type is Thunderbolt port.
+			 * Thunderbolt port entry type.
 			 */
-			if (in_range((entry - 1), start, end)) {
-				fprintf(stdout, "Requested device is Thunderbolt port.\n");
+			if (in_range(index, start, end)) {
+				fprintf(stdout, "Spec: %s\n", pci_smt);
+				fprintf(stdout, "Mode: %s\n", thun_mode);
+				fprintf(stdout, "Type: %s\n", thun_port_type);
 
 				break;
 			}
@@ -619,10 +619,12 @@ int main (int argc, char **argv) {
 			end = ((start + bridges->length) - 1);
 
 			/**
-			 * If entry type is Thunderbolt bridge.
+			 * Thunderbolt bridge entry type.
 			 */
-			if (in_range((entry - 1), start, end)) {
-				fprintf(stdout, "Requested device is Thunderbolt bridge.\n");
+			if (in_range(index, start, end)) {
+				fprintf(stdout, "Spec: %s\n", pci_smt);
+				fprintf(stdout, "Mode: %s\n", thun_mode);
+				fprintf(stdout, "Type: %s\n", thun_brid_type);
 
 				break;
 			}
@@ -631,17 +633,16 @@ int main (int argc, char **argv) {
 			end = ((start + switches->length) - 1);
 
 			/**
-			 * If entry type is Thunderbolt switch.
+			 * Thunderbolt switch entry type.
 			 */
-			if (in_range((entry - 1), start, end)) {
-				fprintf(stdout, "Requested device is Thunderbolt switch.\n");
+			if (in_range(index, start, end)) {
+				fprintf(stdout, "Spec: %s\n", pci_smt);
+				fprintf(stdout, "Mode: %s\n", thun_mode);
+				fprintf(stdout, "Type: %s\n", thun_swit_type);
 
 				break;
 			}
 
-			/**
-			 * Should never end up here.
-			 */
 			fprintf(stdout, "Requested device is Unknown.\n");
 
 			break;
