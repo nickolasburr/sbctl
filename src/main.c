@@ -591,8 +591,11 @@ int main (int argc, char **argv) {
 			end = (usbif->length - 1);
 
 			/**
-			 * USB entry type.
+			 *
+			 * USB entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				/**
 				 * Get device object, interface.
@@ -610,6 +613,10 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1sSpec: %s\n", "", usb_smt);
 				fprintf(stdout, "%1sMode: %s\n", "", usb_smt);
 				fprintf(stdout, "%1sType: %s\n", "", lines);
+
+				/**
+				 * Separate into new block.
+				 */
 				fprintf(stdout, "\n");
 
 				/**
@@ -668,9 +675,67 @@ int main (int argc, char **argv) {
 				assert(!err);
 
 				/**
-				 * ex., Speed: 480Mbps
+				 * ex., Speed: 480Mbps [High]
 				 */
-				fprintf(stdout, "%1sSpeed: %s%s\n", "", usb_speed_spec, DEV_SPEED_UNITS);
+				fprintf(stdout, "%1sSpeed: %s%s", "", usb_speed_spec, DEV_SPEED_UNITS);
+
+				switch (usb_speed) {
+					case kUSBDeviceSpeedLow:
+						fprintf(stdout, "%1s%s\n", "", "[Low]");
+
+						break;
+					case kUSBDeviceSpeedFull:
+						fprintf(stdout, "%1s%s\n", "", "[Full]");
+
+						break;
+					case kUSBDeviceSpeedHigh:
+						fprintf(stdout, "%1s%s\n", "", "[High]");
+
+						break;
+					case kUSBDeviceSpeedSuper:
+						fprintf(stdout, "%1s%s\n", "", "[Super]");
+
+						break;
+					case kUSBDeviceSpeedSuperPlus:
+						fprintf(stdout, "%1s%s\n", "", "[Super+]");
+
+						break;
+					default:
+						fprintf(stdout, "%1s%s\n", "", "[Unknown]");
+				}
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				serial = USB_get_device_serial_number(&err, &device);
+				assert(!err);
+
+				serial = !is_null(serial) ? serial : lines;
+
+				/**
+				 * ex., Serial: 00000000
+				 */
+				fprintf(stdout, "%1sSerial: %s\n", "", serial);
+
+				dev_id = USB_get_device_id(&err, devif);
+				assert(!err);
+
+				/**
+				 * ex., Device ID: 016
+				 */
+				fprintf(stdout, "%1sDevice ID: %lu\n", "", dev_id);
+
+				vendor = USB_get_device_vendor_name(&err, &device);
+				assert(!err);
+
+				vendor = !is_null(vendor) ? vendor : lines;
+
+				/**
+				 * ex., Vendor: Apple
+				 */
+				fprintf(stdout, "%1sVendor: %s\n", "", vendor);
 
 				break;
 			}
@@ -679,8 +744,11 @@ int main (int argc, char **argv) {
 			end = ((start + ports->length) - 1);
 
 			/**
-			 * Thunderbolt port entry type.
+			 *
+			 * Thunderbolt port entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
@@ -706,8 +774,11 @@ int main (int argc, char **argv) {
 			end = ((start + bridges->length) - 1);
 
 			/**
-			 * Thunderbolt bridge entry type.
+			 *
+			 * Thunderbolt bridge entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
@@ -734,8 +805,11 @@ int main (int argc, char **argv) {
 			end = ((start + switches->length) - 1);
 
 			/**
-			 * Thunderbolt switch entry type.
+			 *
+			 * Thunderbolt switch entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
