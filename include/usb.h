@@ -13,7 +13,6 @@
 
 #define kUSBPortNumberKey "PortNum"
 
-#define UNITS_BUS_POWER "mA"
 #define USB_LOW_SPEED "1.5"
 #define USB_FULL_SPEED "12"
 #define USB_HIGH_SPEED "480"
@@ -35,7 +34,7 @@ unsigned long USB_get_device_port_number(int *, io_service_t *);
 char *USB_get_device_product_name(int *, io_service_t *);
 char *USB_get_device_serial_number(int *, io_service_t *);
 int USB_get_device_speed(int *, IOUSBDeviceInterface **);
-char *USB_get_device_speed_as_spec(int *, int);
+char *USB_get_device_speed_per_spec(int *, int);
 char *USB_get_device_vendor_name(int *, io_service_t *);
 int USB_reset_device(int *, IOUSBDeviceInterface **);
 

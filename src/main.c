@@ -229,7 +229,7 @@ int main (int argc, char **argv) {
 				usb_speed = USB_get_device_speed(&err, devif);
 				assert(!err);
 
-				usb_speed_spec = USB_get_device_speed_as_spec(&err, usb_speed);
+				usb_speed_spec = USB_get_device_speed_per_spec(&err, usb_speed);
 				assert(!err);
 
 				/**
@@ -539,7 +539,7 @@ int main (int argc, char **argv) {
 			opt_arg = argv[2];
 
 			if (is_null(opt_arg)) {
-				fprintf(stderr, "'%s %s' requires an entry index number.\n", target, cmd_arg);
+				fprintf(stderr, "%s%1s%s: Entry index required.\n", target, "", cmd_arg);
 
 				exit(EXIT_FAILURE);
 			}
@@ -548,7 +548,7 @@ int main (int argc, char **argv) {
 			 * Entry index numbers need to be prefixed with % sign.
 			 */
 			if (opt_arg[index] != ASCII_PERCENT) {
-				fprintf(stderr, "Invalid format given as argument to '%s %s'\n", target, cmd_arg);
+				fprintf(stderr, "%s%1s%s: Invalid format given as argument.\n", target, "", cmd_arg);
 
 				exit(EXIT_FAILURE);
 			}
@@ -567,7 +567,7 @@ int main (int argc, char **argv) {
 			 * Verify numbers represents valid integer.
 			 */
 			if (!is_numeric(numbers)) {
-				fprintf(stderr, "%s is not a valid number.\n", numbers);
+				fprintf(stderr, "%s%1s%s: %s is not a valid number.\n", target, "", cmd_arg, numbers);
 
 				exit(EXIT_FAILURE);
 			}
@@ -581,7 +581,7 @@ int main (int argc, char **argv) {
 			 * Verify entry is in range {1, total_entries}.
 			 */
 			if (!((entry >= 1) && (entry <= total_entries))) {
-				fprintf(stderr, "Invalid entry index %s\n", numbers);
+				fprintf(stderr, "%s%1s%s: Invalid entry index %s\n", target, "", cmd_arg, numbers);
 
 				exit(EXIT_FAILURE);
 			}
@@ -591,8 +591,11 @@ int main (int argc, char **argv) {
 			end = (usbif->length - 1);
 
 			/**
-			 * USB entry type.
+			 *
+			 * USB entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				/**
 				 * Get device object, interface.
@@ -604,12 +607,135 @@ int main (int argc, char **argv) {
 				product = USB_get_device_product_name(&err, &device);
 				assert(!err);
 
-				product = !is_null(product) ? product : lines;
+				product = !is_null(product) ? product : NOT_SPECIFIED;
 
 				fprintf(stdout, "%1s%s\n\n", "", product);
 				fprintf(stdout, "%1sSpec: %s\n", "", usb_smt);
 				fprintf(stdout, "%1sMode: %s\n", "", usb_smt);
 				fprintf(stdout, "%1sType: %s\n", "", lines);
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Get device locationID for bus number.
+				 */
+				usb_lid = USB_get_device_location_id(&err, devif);
+				assert(!err);
+
+				/**
+				 * Format locationID into hex for strtoul.
+				 */
+				snprintf(bus_buf, 5, "%#lx", usb_lid);
+				fprintf(stdout, "%1sBus: %-*.3d\n", "", 3, (int) strtoul(bus_buf, NULL, 0));
+
+				/**
+				 * Get device assigned address.
+				 */
+				address = USB_get_device_address(&err, devif);
+				assert(!err);
+
+				/**
+				 * ex., Address: 001
+				 */
+				fprintf(stdout, "%1sAddress: %-*.3lu\n", "", 3, address);
+
+				/**
+				 * Get device port number.
+				 */
+				usb_port = USB_get_device_port_number(&err, &device);
+				assert(!err);
+
+				/**
+				 * ex., Port: 02
+				 */
+				if (!is_error((int) usb_port, -1)) {
+					fprintf(stdout, "%1sPort: %-*.2lu\n", "", 3, usb_port);
+				} else {
+					fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, lines);
+				}
+
+				/**
+				 * Get bus power available to device.
+				 */
+				power = USB_get_bus_power(&err, devif);
+				assert(!err);
+
+				/**
+				 * ex., Power: 250mA
+				 */
+				fprintf(stdout, "%1sPower: %*d%s\n", "", (snprintf(0, 0, "%+d", power) - 1), power, BUS_POWER_UNITS);
+
+				usb_speed = USB_get_device_speed(&err, devif);
+				assert(!err);
+
+				usb_speed_spec = USB_get_device_speed_per_spec(&err, usb_speed);
+				assert(!err);
+
+				/**
+				 * ex., Speed: 480Mbps [High]
+				 */
+				fprintf(stdout, "%1sSpeed: %s%s", "", usb_speed_spec, DEV_SPEED_UNITS);
+
+				switch (usb_speed) {
+					case kUSBDeviceSpeedLow:
+						fprintf(stdout, "%1s%s\n", "", "[Low]");
+
+						break;
+					case kUSBDeviceSpeedFull:
+						fprintf(stdout, "%1s%s\n", "", "[Full]");
+
+						break;
+					case kUSBDeviceSpeedHigh:
+						fprintf(stdout, "%1s%s\n", "", "[High]");
+
+						break;
+					case kUSBDeviceSpeedSuper:
+						fprintf(stdout, "%1s%s\n", "", "[Super]");
+
+						break;
+					case kUSBDeviceSpeedSuperPlus:
+						fprintf(stdout, "%1s%s\n", "", "[Super+]");
+
+						break;
+					default:
+						fprintf(stdout, "%1s%s\n", "", "[Unknown]");
+				}
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				serial = USB_get_device_serial_number(&err, &device);
+				assert(!err);
+
+				serial = !is_null(serial) ? serial : lines;
+
+				/**
+				 * ex., Serial: 00000000
+				 */
+				fprintf(stdout, "%1sSerial: %s\n", "", serial);
+
+				dev_id = USB_get_device_id(&err, devif);
+				assert(!err);
+
+				/**
+				 * ex., Device ID: 016
+				 */
+				fprintf(stdout, "%1sDevice ID: %lu\n", "", dev_id);
+
+				vendor = USB_get_device_vendor_name(&err, &device);
+				assert(!err);
+
+				vendor = !is_null(vendor) ? vendor : lines;
+
+				/**
+				 * ex., Vendor: Apple
+				 */
+				fprintf(stdout, "%1sVendor: %s\n", "", vendor);
 
 				break;
 			}
@@ -618,8 +744,11 @@ int main (int argc, char **argv) {
 			end = ((start + ports->length) - 1);
 
 			/**
-			 * Thunderbolt port entry type.
+			 *
+			 * Thunderbolt port entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
@@ -631,7 +760,7 @@ int main (int argc, char **argv) {
 				product = THUN_get_port_description(&err, &port);
 				assert(!err);
 
-				product = !is_null(product) ? product : lines;
+				product = !is_null(product) ? product : NOT_SPECIFIED;
 
 				fprintf(stdout, "%1s%s\n\n", "", product);
 				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
@@ -645,8 +774,11 @@ int main (int argc, char **argv) {
 			end = ((start + bridges->length) - 1);
 
 			/**
-			 * Thunderbolt bridge entry type.
+			 *
+			 * Thunderbolt bridge entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
@@ -673,8 +805,11 @@ int main (int argc, char **argv) {
 			end = ((start + switches->length) - 1);
 
 			/**
-			 * Thunderbolt switch entry type.
+			 *
+			 * Thunderbolt switch entry.
+			 *
 			 */
+
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
 
