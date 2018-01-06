@@ -606,10 +606,10 @@ int main (int argc, char **argv) {
 
 				product = !is_null(product) ? product : lines;
 
-				fprintf(stdout, "%s\n\n", product);
-				fprintf(stdout, "Spec: %s\n", usb_smt);
-				fprintf(stdout, "Mode: %s\n", usb_smt);
-				fprintf(stdout, "Type: %s\n", lines);
+				fprintf(stdout, "%1s%s\n\n", "", product);
+				fprintf(stdout, "%1sSpec: %s\n", "", usb_smt);
+				fprintf(stdout, "%1sMode: %s\n", "", usb_smt);
+				fprintf(stdout, "%1sType: %s\n", "", lines);
 
 				break;
 			}
@@ -633,10 +633,10 @@ int main (int argc, char **argv) {
 
 				product = !is_null(product) ? product : lines;
 
-				fprintf(stdout, "%s\n\n", product);
-				fprintf(stdout, "Spec: %s\n", pci_smt);
-				fprintf(stdout, "Mode: %s\n", thun_mode);
-				fprintf(stdout, "Type: %s\n", thun_port_type);
+				fprintf(stdout, "%1s%s\n\n", "", product);
+				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
+				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
+				fprintf(stdout, "%1sType: %s\n", "", thun_port_type);
 
 				break;
 			}
@@ -661,10 +661,10 @@ int main (int argc, char **argv) {
 				tb_name = THUN_get_bridge_name(&err, &bridge);
 				assert(!err);
 
-				fprintf(stdout, "%s\n\n", tb_name);
-				fprintf(stdout, "Spec: %s\n", pci_smt);
-				fprintf(stdout, "Mode: %s\n", thun_mode);
-				fprintf(stdout, "Type: %s\n", thun_brid_type);
+				fprintf(stdout, "%1s%s\n\n", "", tb_name);
+				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
+				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
+				fprintf(stdout, "%1sType: %s\n", "", thun_brid_type);
 
 				break;
 			}
@@ -689,10 +689,10 @@ int main (int argc, char **argv) {
 				ts_name = THUN_get_switch_name(&err, &swit);
 				assert(!err);
 
-				fprintf(stdout, "%s\n\n", ts_name);
-				fprintf(stdout, "Spec: %s\n", pci_smt);
-				fprintf(stdout, "Mode: %s\n", thun_mode);
-				fprintf(stdout, "Type: %s\n", thun_swit_type);
+				fprintf(stdout, "%1s%s\n\n", "", ts_name);
+				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
+				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
+				fprintf(stdout, "%1sType: %s\n", "", thun_swit_type);
 
 				break;
 			}
