@@ -13,6 +13,9 @@
 #include <IOKit/hid/IOHIDKeys.h>
 #include "common.h"
 
+#define BUS_POWER_UNITS "mA"
+#define DEV_SPEED_UNITS "Mbps"
+
 typedef struct {
 	io_service_t *devices;
 	int length;

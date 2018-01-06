@@ -11,6 +11,7 @@
                     "| ### | Spec | Mode | Type | Bus | Address | Port | Power [mA] | Speed [Mbps] | Serial Number | Device ID  | Vendor | Product Description |\n" \
                     "-------------------------------------------------------------------------------------------------------------------------------------------\n"
 #define LIST_FOOTER "-------------------------------------------------------------------------------------------------------------------------------------------\n"
+#define NOT_SPECIFIED "Not Specified"
 
 
 #endif /* SBCTL_FORMAT_H */

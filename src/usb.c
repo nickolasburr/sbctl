@@ -320,7 +320,7 @@ on_error:
  * Get projected device throughput speed as string,
  * which contains max TP, as outlined in USB specs.
  */
-char *USB_get_device_speed_as_spec (int *err, int speed) {
+char *USB_get_device_speed_per_spec (int *err, int speed) {
 	char *speed_spec = NULL;
 
 	*err = 0;
