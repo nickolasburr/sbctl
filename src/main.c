@@ -985,15 +985,15 @@ int main (int argc, char **argv) {
 				 */
 				switch (tb_vers) {
 					case THUN_V1:
-						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V1_SPEED);
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 1]\n", "", 5, THUN_V1_SPEED);
 
 						break;
 					case THUN_V2:
-						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V2_SPEED);
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 2]\n", "", 5, THUN_V2_SPEED);
 
 						break;
 					case THUN_V3:
-						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V3_SPEED);
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 3]\n", "", 5, THUN_V3_SPEED);
 
 						break;
 					default:
