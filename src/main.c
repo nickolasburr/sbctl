@@ -221,7 +221,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get bus power available to device.
 				 */
-				power = USB_get_bus_power(&err, devif);
+				power = USB_get_device_bus_power(&err, devif);
 				assert(!err);
 
 				/**
@@ -673,7 +673,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Get bus power available to device.
 				 */
-				power = USB_get_bus_power(&err, devif);
+				power = USB_get_device_bus_power(&err, devif);
 				assert(!err);
 
 				/**
