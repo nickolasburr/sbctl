@@ -885,6 +885,39 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
 				fprintf(stdout, "%1sType: %s\n", "", thun_brid_type);
 
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Get bridge bus number.
+				 */
+				tb_bus = THUN_get_bridge_bus_number(&err, &bridge);
+				assert(!err);
+
+				fprintf(stdout, "%1sBus: %-*.3lu\n", "", 3, tb_bus);
+
+				/**
+				 * Placeholder for Address, Port, Power, Speed.
+				 */
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sSpeed: %-*.3s\n", "", 3, lines);
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Placeholders for Serial Number, Device ID, and Vendor.
+				 */
+				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sDevice ID: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sVendor: %-*.3s\n", "", 3, lines);
+
 				break;
 			}
 
