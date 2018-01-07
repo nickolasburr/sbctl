@@ -26,7 +26,7 @@ io_service_t USB_get_device_by_vendor_product_ids(int *, int, int);
 void USB_get_devices(int *, io_service_t *);
 int USB_get_total_devices(int *);
 unsigned long long USB_get_bus_frame(int *, IOUSBDeviceInterface **);
-unsigned long USB_get_bus_power(int *, IOUSBDeviceInterface **);
+unsigned long USB_get_device_bus_power(int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_address(int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_id (int *, IOUSBDeviceInterface **);
 unsigned long USB_get_device_location_id(int *, IOUSBDeviceInterface **);

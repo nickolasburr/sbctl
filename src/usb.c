@@ -250,7 +250,7 @@ on_error:
 /**
  * Get bus power (in mA) available to USB device.
  */
-unsigned long USB_get_bus_power (int *err, IOUSBDeviceInterface **devif) {
+unsigned long USB_get_device_bus_power (int *err, IOUSBDeviceInterface **devif) {
 	UInt32 power;
 	IOReturn status;
 
