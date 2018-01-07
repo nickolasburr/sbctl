@@ -885,6 +885,39 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
 				fprintf(stdout, "%1sType: %s\n", "", thun_brid_type);
 
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Get bridge bus number.
+				 */
+				tb_bus = THUN_get_bridge_bus_number(&err, &bridge);
+				assert(!err);
+
+				fprintf(stdout, "%1sBus: %-*.3lu\n", "", 3, tb_bus);
+
+				/**
+				 * Placeholder for Address, Port, Power, Speed.
+				 */
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sSpeed: %-*.3s\n", "", 3, lines);
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Placeholders for Serial Number, Device ID, and Vendor.
+				 */
+				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sDevice ID: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sVendor: %-*.3s\n", "", 3, lines);
+
 				break;
 			}
 
@@ -916,10 +949,87 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
 				fprintf(stdout, "%1sType: %s\n", "", thun_swit_type);
 
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Get switch bus number.
+				 */
+				ts_bus = THUN_get_switch_bus_number(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1sBus: %-*.3lu\n", "", 3, ts_bus);
+
+				/**
+				 * Placeholder for Address.
+				 */
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+
+				thun_port = THUN_get_switch_port_number(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1sPort: %-*.2lu\n", "", 3, thun_port);
+
+				/**
+				 * Placeholder for Power.
+				 */
+				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, lines);
+
+				tb_vers = THUN_get_switch_thunderbolt_version(&err, &swit);
+				assert(!err);
+
+				/**
+				 * Show speed rating based on Thunderbolt version.
+				 */
+				switch (tb_vers) {
+					case THUN_V1:
+						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V1_SPEED);
+
+						break;
+					case THUN_V2:
+						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V2_SPEED);
+
+						break;
+					case THUN_V3:
+						fprintf(stdout, "%1sSpeed: %-*.5d\n", "", 5, THUN_V3_SPEED);
+
+						break;
+					default:
+						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, lines);
+				}
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Placeholder for Serial Number.
+				 */
+				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, lines);
+
+				/**
+				 * Get PCI Thunderbolt device ID.
+				 */
+				dev_id = THUN_get_switch_device_id(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1sDevice ID: %-*.3lu\n", "", 3, dev_id);
+
+				/**
+				 * Get PCI Thunderbolt switch vendor.
+				 */
+				ts_vendor = THUN_get_switch_vendor(&err, &swit);
+				assert(!err);
+
+				fprintf(stdout, "%1sVendor: %s\n", "", ts_vendor);
+
 				break;
 			}
 
-			fprintf(stdout, "Requested device is Unknown.\n");
+			fprintf(stderr, "An error occurred. The requested device could not be located.\n");
 
 			break;
 		/**
