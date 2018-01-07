@@ -153,8 +153,11 @@ int main (int argc, char **argv) {
 			count = 0;
 
 			/**
-			 * List USB devices, buses, hubs, etc.
+			 *
+			 * USB devices, buses, hubs, etc.
+			 *
 			 */
+
 			for (index = 0; index < usbif->length; index += 1) {
 				/**
 				 * Get device object, interface.
@@ -281,8 +284,11 @@ int main (int argc, char **argv) {
 			}
 
 			/**
-			 * List Thunderbolt ports.
+			 *
+			 * Thunderbolt ports.
+			 *
 			 */
+
 			for (index = 0; index < ports->length; index += 1) {
 				/**
 				 * Get port object.
@@ -359,7 +365,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
 
 				/**
-				 * Placeholders for Vendor and Product Description.
+				 * Placeholder for Vendor.
 				 */
 				fprintf(stdout, "%1s%-*.6s", "", 8, lines);
 
@@ -372,8 +378,11 @@ int main (int argc, char **argv) {
 			}
 
 			/**
-			 * List PCI-PCI Thunderbolt bridges.
+			 *
+			 * PCI-PCI Thunderbolt bridges.
+			 *
 			 */
+
 			for (index = 0; index < bridges->length; index += 1) {
 				/**
 				 * Get bridge object.
@@ -429,8 +438,11 @@ int main (int argc, char **argv) {
 			}
 
 			/**
-			 * List Thunderbolt switches.
+			 *
+			 * Thunderbolt switches.
+			 *
 			 */
+
 			for (index = 0; index < switches->length; index += 1) {
 				/**
 				 * Get switch object.
@@ -587,14 +599,15 @@ int main (int argc, char **argv) {
 			}
 
 			index = (entry - 1);
-			start = 0;
-			end = (usbif->length - 1);
 
 			/**
 			 *
 			 * USB entry.
 			 *
 			 */
+
+			start = 0;
+			end = (usbif->length - 1);
 
 			if (in_range(index, start, end)) {
 				/**
@@ -740,14 +753,14 @@ int main (int argc, char **argv) {
 				break;
 			}
 
-			start = (end + 1);
-			end = ((start + ports->length) - 1);
-
 			/**
 			 *
 			 * Thunderbolt port entry.
 			 *
 			 */
+
+			start = (end + 1);
+			end = ((start + ports->length) - 1);
 
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
@@ -767,17 +780,91 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
 				fprintf(stdout, "%1sType: %s\n", "", thun_port_type);
 
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				tp_bus = THUN_get_port_bus_number(&err, &port);
+				assert(!err);
+
+				fprintf(stdout, "%1sBus: %-*.3lu\n", "", 3, tp_bus);
+
+				/**
+				 * Placeholder for Address.
+				 */
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+
+				thun_port = THUN_get_port_port_number(&err, &port);
+				assert(!err);
+
+				/**
+				 * Port number.
+				 */
+				fprintf(stdout, "%1sPort: %-*.2lu\n", "", 2, thun_port);
+
+				/**
+				 * Placeholder for Power.
+				 */
+				fprintf(stdout, "%1sPower: %-*s\n", "", 3, lines);
+
+				tb_vers = THUN_get_port_thunderbolt_version(&err, &port);
+				assert(!err);
+
+				/**
+				 * Show speed rating based on Thunderbolt version.
+				 */
+				switch (tb_vers) {
+					case THUN_V1:
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 1]\n", "", 5, THUN_V1_SPEED);
+
+						break;
+					case THUN_V2:
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 2]\n", "", 5, THUN_V2_SPEED);
+
+						break;
+					case THUN_V3:
+						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 3]\n", "", 5, THUN_V3_SPEED);
+
+						break;
+					default:
+						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, lines);
+				}
+
+				/**
+				 * Separate into new block.
+				 */
+				fprintf(stdout, "\n");
+
+				/**
+				 * Placeholder for Serial Number.
+				 */
+				fprintf(stdout, "%1sSerial: %s\n", "", lines);
+
+				dev_id = THUN_get_port_device_id(&err, &port);
+				assert(!err);
+
+				/**
+				 * Device ID.
+				 */
+				fprintf(stdout, "%1sDevice ID: %-*.3lu\n", "", 3, dev_id);
+
+				/**
+				 * Placeholder for Vendor.
+				 */
+				fprintf(stdout, "%1sVendor: %s\n", "", lines);
+
 				break;
 			}
-
-			start = (end + 1);
-			end = ((start + bridges->length) - 1);
 
 			/**
 			 *
 			 * Thunderbolt bridge entry.
 			 *
 			 */
+
+			start = (end + 1);
+			end = ((start + bridges->length) - 1);
 
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
@@ -801,14 +888,14 @@ int main (int argc, char **argv) {
 				break;
 			}
 
-			start = (end + 1);
-			end = ((start + switches->length) - 1);
-
 			/**
 			 *
 			 * Thunderbolt switch entry.
 			 *
 			 */
+
+			start = (end + 1);
+			end = ((start + switches->length) - 1);
 
 			if (in_range(index, start, end)) {
 				index = ((entry - start) - 1);
