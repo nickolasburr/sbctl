@@ -12,6 +12,12 @@ static Command_T commands[] = {
 		"ls",
 		"List all known serial devices.",
 		MASK_CMD_LIST,
+		{
+			"--usb",
+			"-U",
+			"List USB devices, buses, hubs, etc.",
+			MASK_CMD_LIST_OPT_USB
+		},
 	},
 	{
 		"get",
@@ -48,7 +54,7 @@ static Command_T commands[] = {
 /**
  * Get command bitmask.
  */
-int ARGV_get_command_bitmask (char *value) {
+int ARGV_get_command_bitmask (const char *value) {
 	int index;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
@@ -74,9 +80,44 @@ int ARGV_get_command_bitmask (char *value) {
  *
  * @todo: Finish building this out.
  */
-int ARGV_get_option_bitmask (char *value) {
-	int index;
-	return 0;
+int ARGV_get_option_bitmask (const char *cmd, const char *value, int length) {
+	int index, xindex;
+	Command_T *command = NULL;
+	Option_T *options = NULL,
+	         *option = NULL;
+
+	for (index = 0; index < NUM_CMDS; index += 1) {
+		command = &commands[index];
+
+		if (!compare(command->value, value)) {
+			options = command->options;
+
+			for (xindex = 0; xindex < length; xindex += 1) {
+				option = &options[xindex];
+
+				if (!compare(option->value, value)) {
+					return option->bitmask;
+				}
+			}
+		}
+
+		/**
+		 * Check command->alias for possible match, as well.
+		 */
+		if (!is_null(command->alias) && !compare(command->alias, value)) {
+			options = command->options;
+
+			for (xindex = 0; xindex < length; xindex += 1) {
+				option = &options[xindex];
+
+				if (!compare(option->value, value)) {
+					return option->bitmask;
+				}
+			}
+		}
+	}
+
+	return -1;
 }
 
 /**

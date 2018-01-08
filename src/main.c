@@ -138,7 +138,7 @@ int main (int argc, char **argv) {
 	total_entries += switches->length;
 
 	/**
-	 * Handle commands, options based on bitmask.
+	 * Handle commands based on bitmask.
 	 */
 	switch (ARGV_get_command_bitmask(cmd_arg)) {
 		/**
@@ -146,6 +146,29 @@ int main (int argc, char **argv) {
 		 */
 		case MASK_CMD_LIST:
 			fprintf(stdout, LIST_HEADER);
+
+			/**
+			 * Modifier option given to 'sbctl ls'.
+			 */
+			opt_arg = argv[2];
+
+			if (!is_null(opt_arg)) {
+				/**
+				 * Handle options based on bitmask.
+				 *
+				 * @todo: Get length of options by command.
+				 */
+				switch (ARGV_get_option_bitmask(cmd_arg, opt_arg, LIST_NUM_OPTS)) {
+					case MASK_CMD_LIST_OPT_USB:
+						fprintf(stdout, "Option given: %s\n\n", opt_arg);
+
+						break;
+					default:
+						fprintf(stdout, "%s%1s%s: Invalid option %s\n", target, "", cmd_arg, opt_arg);
+
+						exit(EXIT_FAILURE);
+				}
+			}
 
 			/**
 			 * Entry index counter.
@@ -585,7 +608,7 @@ int main (int argc, char **argv) {
 			}
 
 			/**
-			 * Get the actual entry index, as an integer.
+			 * The actual entry index, as an integer.
 			 */
 			entry = (int) strtol(numbers, NULL, 0);
 
@@ -598,6 +621,10 @@ int main (int argc, char **argv) {
 				exit(EXIT_FAILURE);
 			}
 
+			/**
+			 * Index of requested entry, adjusted for
+			 * an initial index of 1 instead of 0.
+			 */
 			index = (entry - 1);
 
 			/**
