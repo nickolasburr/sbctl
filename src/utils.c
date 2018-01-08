@@ -37,7 +37,7 @@ char *base_name (char *path) {
 /**
  * `strcmp` wrapper
  */
-int compare (char *one, char *two) {
+int compare (const char *one, const char *two) {
 	return strcmp(one, two);
 };
 
@@ -117,7 +117,7 @@ int in_array (char *element, char **array, size_t size) {
 /**
  * `strlen` wrapper
  */
-int length (char *str) {
+int length (const char *str) {
 	return strlen(str);
 }
 

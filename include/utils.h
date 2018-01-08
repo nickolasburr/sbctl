@@ -25,13 +25,13 @@ int in_range(int, int, int);
  */
 
 char *base_name(char *);
-int compare(char *, char *);
+int compare(const char *, const char *);
 char *concat(char *, char *);
 char *copy(char *, char *);
 char *dir_name(char *);
 int index_of(char *, char **, size_t);
 int in_array(char *, char **, size_t);
-int length(char *);
+int length(const char *);
 
 /**
  * Filesystem utilities

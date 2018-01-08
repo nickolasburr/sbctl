@@ -6,18 +6,25 @@
 
 #include "argv.h"
 
+/**
+ * sbctl ls options.
+ */
+static Option_T list_opts[] = {
+	{
+		"usb",
+		"U",
+		"List USB devices, buses, hubs, etc.",
+		MASK_CMD_LIST_OPT_USB,
+	},
+};
+
 static Command_T commands[] = {
 	{
 		"list",
 		"ls",
 		"List all known serial devices.",
 		MASK_CMD_LIST,
-		{
-			"--usb",
-			"-U",
-			"List USB devices, buses, hubs, etc.",
-			MASK_CMD_LIST_OPT_USB
-		},
+		list_opts,
 	},
 	{
 		"get",
@@ -77,24 +84,19 @@ int ARGV_get_command_bitmask (const char *value) {
 
 /**
  * Get option bitmask.
- *
- * @todo: Finish building this out.
  */
-int ARGV_get_option_bitmask (const char *cmd, const char *value, int length) {
+int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 	int index, xindex;
 	Command_T *command = NULL;
-	Option_T *options = NULL,
-	         *option = NULL;
+	Option_T *option = NULL;
+
+	xindex = 0;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
 		command = &commands[index];
 
-		if (!compare(command->value, value)) {
-			options = command->options;
-
-			for (xindex = 0; xindex < length; xindex += 1) {
-				option = &options[xindex];
-
+		if (!compare(command->value, cmd)) {
+			while ((option = &command->options[xindex++])) {
 				if (!compare(option->value, value)) {
 					return option->bitmask;
 				}
@@ -104,12 +106,8 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value, int length) {
 		/**
 		 * Check command->alias for possible match, as well.
 		 */
-		if (!is_null(command->alias) && !compare(command->alias, value)) {
-			options = command->options;
-
-			for (xindex = 0; xindex < length; xindex += 1) {
-				option = &options[xindex];
-
+		if (!is_null(command->alias) && !compare(command->alias, cmd)) {
+			while ((option = &command->options[xindex++])) {
 				if (!compare(option->value, value)) {
 					return option->bitmask;
 				}

@@ -158,7 +158,7 @@ int main (int argc, char **argv) {
 				 *
 				 * @todo: Get length of options by command.
 				 */
-				switch (ARGV_get_option_bitmask(cmd_arg, opt_arg, LIST_NUM_OPTS)) {
+				switch (ARGV_get_option_bitmask(cmd_arg, opt_arg)) {
 					case MASK_CMD_LIST_OPT_USB:
 						fprintf(stdout, "Option given: %s\n\n", opt_arg);
 
@@ -166,7 +166,7 @@ int main (int argc, char **argv) {
 					default:
 						fprintf(stdout, "%s%1s%s: Invalid option %s\n", target, "", cmd_arg, opt_arg);
 
-						exit(EXIT_FAILURE);
+						goto on_error;
 				}
 			}
 
@@ -1103,4 +1103,16 @@ int main (int argc, char **argv) {
 	FREE(switches);
 
 	return 0;
+
+on_error:
+	FREE(usbif->devices);
+	FREE(usbif);
+	FREE(ports->ports);
+	FREE(ports);
+	FREE(bridges->bridges);
+	FREE(bridges);
+	FREE(switches->switches);
+	FREE(switches);
+
+	return -1;
 }
