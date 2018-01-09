@@ -12,7 +12,7 @@
 #include "utils.h"
 
 #define NUM_CMDS 6
-#define LIST_NUM_OPTS 1
+#define LIST_NUM_OPTS 2
 
 /**
  * Hex masks for commands.
@@ -28,6 +28,7 @@
  * Hex masks for options.
  */
 #define MASK_CMD_LIST_OPT_USB ((0xFF << 0x1))
+#define MASK_CMD_LIST_OPT_PCI ((0xFF << 0x2))
 
 /**
  * ASCII character codes.

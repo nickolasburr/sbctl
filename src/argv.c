@@ -11,8 +11,14 @@
  */
 static Option_T list_opts[] = {
 	{
-		"usb",
-		"U",
+		"--pci",
+		"-P",
+		"List PCI devices, buses, bridges, etc.",
+		MASK_CMD_LIST_OPT_PCI,
+	},
+	{
+		"--usb",
+		"-U",
 		"List USB devices, buses, hubs, etc.",
 		MASK_CMD_LIST_OPT_USB,
 	},
@@ -84,9 +90,11 @@ int ARGV_get_command_bitmask (const char *value) {
 
 /**
  * Get option bitmask.
+ *
+ * @todo: Refactor & condense.
  */
 int ARGV_get_option_bitmask (const char *cmd, const char *value) {
-	int index, xindex;
+	int index, xindex, length;
 	Command_T *command = NULL;
 	Option_T *option = NULL;
 
@@ -96,8 +104,19 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 		command = &commands[index];
 
 		if (!compare(command->value, cmd)) {
-			while ((option = &command->options[xindex++])) {
+			/**
+			 * Length of command options array.
+			 */
+			length = (sizeof(&command->options) / sizeof(option));
+
+			while (length--) {
+				option = &command->options[xindex++];
+
 				if (!compare(option->value, value)) {
+					return option->bitmask;
+				}
+
+				if (!is_null(option->alias) && !compare(option->alias, value)) {
 					return option->bitmask;
 				}
 			}
@@ -107,8 +126,21 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 		 * Check command->alias for possible match, as well.
 		 */
 		if (!is_null(command->alias) && !compare(command->alias, cmd)) {
-			while ((option = &command->options[xindex++])) {
+			/**
+			 * Length of command options array.
+			 */
+			length = (sizeof(&command->options) / sizeof(option));
+
+			fprintf(stdout, "1. ARGV_get_option_bitmask -> %s\n", command->alias);
+
+			while (length--) {
+				option = &command->options[xindex++];
+
 				if (!compare(option->value, value)) {
+					return option->bitmask;
+				}
+
+				if (!is_null(option->alias) && !compare(option->alias, value)) {
 					return option->bitmask;
 				}
 			}

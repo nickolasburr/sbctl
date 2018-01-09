@@ -29,9 +29,9 @@ int main (int argc, char **argv) {
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index, power;
+	int count, err, index, num_opts, opt_index;
 	int start, end, entry, total_entries;
-	int usb_speed, thun_speed;
+	int power, usb_speed, thun_speed;
 	unsigned int tb_vers;
 	unsigned long address, usb_lid, dev_id;
 	unsigned long usb_port, thun_port;
@@ -148,25 +148,31 @@ int main (int argc, char **argv) {
 			fprintf(stdout, LIST_HEADER);
 
 			/**
-			 * Modifier option given to 'sbctl ls'.
+			 * Modifier options given to 'sbctl ls'.
 			 */
-			opt_arg = argv[2];
+			for (opt_index = 2; opt_index < argc; opt_index += 1) {
+				opt_arg = argv[opt_index];
 
-			if (!is_null(opt_arg)) {
+				if (!is_null(opt_arg)) {
 				/**
 				 * Handle options based on bitmask.
 				 *
 				 * @todo: Get length of options by command.
 				 */
-				switch (ARGV_get_option_bitmask(cmd_arg, opt_arg)) {
-					case MASK_CMD_LIST_OPT_USB:
-						fprintf(stdout, "Option given: %s\n\n", opt_arg);
+					switch (ARGV_get_option_bitmask(cmd_arg, opt_arg)) {
+						case MASK_CMD_LIST_OPT_USB:
+							fprintf(stdout, "Option given: %s\n\n", opt_arg);
 
-						break;
-					default:
-						fprintf(stdout, "%s%1s%s: Invalid option %s\n", target, "", cmd_arg, opt_arg);
+							break;
+						case MASK_CMD_LIST_OPT_PCI:
+							fprintf(stdout, "Option given: %s\n\n", opt_arg);
 
-						goto on_error;
+							break;
+						default:
+							fprintf(stdout, "%s%1s%s: Invalid option %s\n", target, "", cmd_arg, opt_arg);
+
+							goto on_error;
+					}
 				}
 			}
 
