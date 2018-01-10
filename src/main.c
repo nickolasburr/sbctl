@@ -45,6 +45,8 @@ int main (int argc, char **argv) {
 	Bridge_T *bridges;
 	Switch_T *switches;
 
+	ARGV_init();
+
 	/**
 	 * Name of executable (sbctl).
 	 */

@@ -9,20 +9,6 @@
 /**
  * sbctl ls options.
  */
-static Option_T list_opts[] = {
-	{
-		"--pci",
-		"-P",
-		"List PCI devices, buses, bridges, etc.",
-		MASK_CMD_LIST_OPT_PCI,
-	},
-	{
-		"--usb",
-		"-U",
-		"List USB devices, buses, hubs, etc.",
-		MASK_CMD_LIST_OPT_USB,
-	},
-};
 
 static Command_T commands[] = {
 	{
@@ -30,7 +16,6 @@ static Command_T commands[] = {
 		"ls",
 		"List all known serial devices.",
 		MASK_CMD_LIST,
-		list_opts,
 	},
 	{
 		"get",
@@ -63,6 +48,27 @@ static Command_T commands[] = {
 		MASK_CMD_VERS,
 	},
 };
+
+/**
+ * Initialize command->options[index] structs.
+ */
+void ARGV_init (void) {
+	int index;
+	Command_T *command;
+
+	for (index = 0; index < NUM_CMDS; index += 1) {
+		command = &commands[index];
+
+		command->options = ALLOC(sizeof(command->options));
+
+		switch (ARGV_get_command_bitmask(command->value)) {
+			case MASK_CMD_LIST:
+				break;
+			default:
+				break;
+		}
+	}
+}
 
 /**
  * Get command bitmask.

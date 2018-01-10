@@ -50,11 +50,11 @@ typedef struct {
 	Option_T *options;
 } Command_T;
 
-static Option_T list_opts[LIST_NUM_OPTS];
 static Command_T commands[NUM_CMDS];
 
 int ARGV_get_command_bitmask(const char *);
 int ARGV_get_option_bitmask(const char *, const char *);
+void ARGV_init(void);
 void ARGV_usage(void);
 
 #endif /* SBCTL_ARGV_H */
