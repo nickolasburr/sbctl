@@ -7,9 +7,8 @@
 #include "argv.h"
 
 /**
- * sbctl ls options.
+ * sbctl commands.
  */
-
 static Command_T commands[] = {
 	{
 		"list",
@@ -50,19 +49,39 @@ static Command_T commands[] = {
 };
 
 /**
+ * sbctl ls options.
+ */
+Option_T options[] = {
+	{
+		"--usb",
+		"-U",
+		"List USB devices, buses, hubs, etc.",
+		MASK_CMD_LIST_OPT_USB,
+	},
+	{
+		"--pci",
+		"-P",
+		"List PCI buses, bridges, controllers, etc.",
+		MASK_CMD_LIST_OPT_PCI,
+	},
+};
+
+/**
  * Initialize command->options[index] structs.
  */
 void ARGV_init (void) {
-	int index;
-	Command_T *command;
+	int index, xindex;
+	Command_T *command = NULL;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
 		command = &commands[index];
 
-		command->options = ALLOC(sizeof(command->options));
-
 		switch (ARGV_get_command_bitmask(command->value)) {
 			case MASK_CMD_LIST:
+				fprintf(stdout, "Inside ARGV_init\n");
+
+				command->options = &options;
+
 				break;
 			default:
 				break;
@@ -75,9 +94,10 @@ void ARGV_init (void) {
  */
 int ARGV_get_command_bitmask (const char *value) {
 	int index;
+	Command_T *command = NULL;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
-		Command_T *command = &commands[index];
+		command = &commands[index];
 
 		if (!compare(command->value, value)) {
 			return command->bitmask;
@@ -116,7 +136,7 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 			length = (sizeof(&command->options) / sizeof(option));
 
 			while (length--) {
-				option = &command->options[xindex++];
+				option = &(*command->options)[xindex++];
 
 				if (!compare(option->value, value)) {
 					return option->bitmask;
@@ -135,12 +155,10 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 			/**
 			 * Length of command options array.
 			 */
-			length = (sizeof(&command->options) / sizeof(option));
-
-			fprintf(stdout, "1. ARGV_get_option_bitmask -> %s\n", command->alias);
+			length = (sizeof(command->options) / sizeof(option));
 
 			while (length--) {
-				option = &command->options[xindex++];
+				option = &(*command->options)[xindex++];
 
 				if (!compare(option->value, value)) {
 					return option->bitmask;
@@ -163,12 +181,13 @@ void ARGV_usage (void) {
 	int index;
 	char fvalue[36];
 	char *space = " ";
+	Command_T *command = NULL;
 
 	fprintf(stdout, "Usage: sbctl <COMMAND> [OPTIONS]\n\n");
 	fprintf(stdout, "Commands:\n\n");
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
-		Command_T *command = &commands[index];
+		command = &commands[index];
 
 		/**
 		 * Format command->value string.

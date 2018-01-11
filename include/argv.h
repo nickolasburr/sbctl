@@ -47,10 +47,14 @@ typedef struct {
 	char *alias;
 	char *desc;
 	int bitmask;
-	Option_T *options;
+	Option_T (*options)[];
 } Command_T;
 
 static Command_T commands[NUM_CMDS];
+Option_T options[10];
+
+static Option_T list_opts[4];
+static Option_T get_opts[4];
 
 int ARGV_get_command_bitmask(const char *);
 int ARGV_get_option_bitmask(const char *, const char *);

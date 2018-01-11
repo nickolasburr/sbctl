@@ -156,11 +156,9 @@ int main (int argc, char **argv) {
 				opt_arg = argv[opt_index];
 
 				if (!is_null(opt_arg)) {
-				/**
-				 * Handle options based on bitmask.
-				 *
-				 * @todo: Get length of options by command.
-				 */
+					/**
+					 * Handle options based on bitmask.
+					 */
 					switch (ARGV_get_option_bitmask(cmd_arg, opt_arg)) {
 						case MASK_CMD_LIST_OPT_USB:
 							fprintf(stdout, "Option given: %s\n\n", opt_arg);
