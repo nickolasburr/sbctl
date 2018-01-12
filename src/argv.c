@@ -82,17 +82,21 @@ static Option_T ls_opts[] = {
  * Initialize command->options[index] structs.
  */
 void ARGV_init (void) {
-	int index, xindex;
+	int index;
 	Command_T *command = NULL;
 
 	for (index = 0; index < NUM_CMDS; index += 1) {
 		command = &commands[index];
 
 		switch (ARGV_get_command_bitmask(command->value)) {
+			/**
+			 * sbctl ls
+			 */
 			case MASK_CMD_LIST:
-				fprintf(stdout, "Inside ARGV_init\n");
-
-				command->options = &options;
+				/**
+				 * Make command->options point to ls_opts array.
+				 */
+				command->options = &ls_opts;
 
 				break;
 			default:
@@ -128,24 +132,31 @@ int ARGV_get_command_bitmask (const char *value) {
 
 /**
  * Get option bitmask.
- *
- * @todo: Refactor & condense.
  */
 int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 	int index, xindex, length;
 	Command_T *command = NULL;
 	Option_T *option = NULL;
 
-	xindex = 0;
-
 	for (index = 0; index < NUM_CMDS; index += 1) {
 		command = &commands[index];
 
 		if (!compare(command->value, cmd)) {
 			/**
-			 * Length of command options array.
+			 * Length of command->options array.
 			 */
-			length = (sizeof(&command->options) / sizeof(option));
+			switch (ARGV_get_command_bitmask(cmd)) {
+				case MASK_CMD_LIST:
+					length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+					break;
+				default:
+					length = 0;
+
+					break;
+			}
+
+			xindex = 0;
 
 			while (length--) {
 				option = &(*command->options)[xindex++];
@@ -165,9 +176,20 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 		 */
 		if (!is_null(command->alias) && !compare(command->alias, cmd)) {
 			/**
-			 * Length of command options array.
+			 * Length of command->options array, based on command.
 			 */
-			length = (sizeof(command->options) / sizeof(option));
+			switch (ARGV_get_command_bitmask(cmd)) {
+				case MASK_CMD_LIST:
+					length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+					break;
+				default:
+					length = 0;
+
+					break;
+			}
+
+			xindex = 0;
 
 			while (length--) {
 				option = &(*command->options)[xindex++];
