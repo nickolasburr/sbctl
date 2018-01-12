@@ -13,7 +13,11 @@
 #include <fcntl.h>
 #include "common.h"
 
+/**
+ * @todo: Convert to uppercase convention.
+ */
 #define is_null(ptr) ((ptr) == ((void *) 0))
+#define SIZEOF_FIELD(type, field) (sizeof(((type *) 0)->field))
 
 /**
  * Integral utilities
