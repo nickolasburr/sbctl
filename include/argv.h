@@ -53,10 +53,7 @@ typedef struct {
 } Command_T;
 
 static Command_T commands[NUM_CMDS];
-Option_T options[10];
-
-static Option_T list_opts[4];
-static Option_T get_opts[4];
+static Option_T ls_opts[NUM_LS_OPTS];
 
 int ARGV_get_command_bitmask(const char *);
 int ARGV_get_option_bitmask(const char *, const char *);

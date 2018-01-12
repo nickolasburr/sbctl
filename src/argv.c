@@ -51,7 +51,19 @@ static Command_T commands[] = {
 /**
  * sbctl ls options.
  */
-Option_T options[] = {
+static Option_T ls_opts[] = {
+	{
+		"--pci",
+		"-P",
+		"List PCI buses, bridges, controllers, etc.",
+		MASK_CMD_LIST_OPT_PCI,
+	},
+	{
+		"--thun",
+		"-T",
+		"List Thunderbolt bridges, controllers, ports, etc.",
+		MASK_CMD_LIST_OPT_THUN,
+	},
 	{
 		"--usb",
 		"-U",
@@ -59,10 +71,10 @@ Option_T options[] = {
 		MASK_CMD_LIST_OPT_USB,
 	},
 	{
-		"--pci",
-		"-P",
-		"List PCI buses, bridges, controllers, etc.",
-		MASK_CMD_LIST_OPT_PCI,
+		"--help",
+		"-h",
+		"Show usage information.",
+		MASK_CMD_LIST_OPT_HELP,
 	},
 };
 
