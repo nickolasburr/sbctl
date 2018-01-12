@@ -58,6 +58,7 @@ static Option_T ls_opts[NUM_LS_OPTS];
 int ARGV_get_command_bitmask(const char *);
 int ARGV_get_option_bitmask(const char *, const char *);
 void ARGV_init(void);
-void ARGV_usage(void);
+void ARGV_general_usage(void);
+void ARGV_command_usage(const char *);
 
 #endif /* SBCTL_ARGV_H */

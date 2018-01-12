@@ -209,11 +209,59 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 }
 
 /**
- * Print usage information.
+ * Print command-specific usage information.
  */
-void ARGV_usage (void) {
+void ARGV_command_usage (const char *cmd) {
+	int index, length;
+	char fvalue[40];
+	char *space = " ";
+	Option_T *cmd_opts = NULL;
+	Option_T *option = NULL;
+
+	fprintf(stdout, "Usage: sbctl %s [OPTIONS]\n\n", cmd);
+	fprintf(stdout, "Commands:\n\n");
+
+	switch (ARGV_get_command_bitmask(cmd)) {
+		case MASK_CMD_LIST:
+			cmd_opts = (Option_T *) &ls_opts;
+			length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+			break;
+		default:
+			return;
+	}
+
+	for (index = 0; index < length; index += 1) {
+		option = &cmd_opts[index];
+
+		/**
+		 * Format command->value string.
+		 */
+		copy(fvalue, option->value);
+
+		/**
+		 * If option->alias is non-null,
+		 * format fvalue to include alias.
+		 */
+		if (!is_null(option->alias)) {
+			concat(fvalue, ",");
+		} else {
+			option->alias = "";
+			space = "";
+		}
+
+		fprintf(stdout, "%4s%-s%s%s: %-24s\n", "", fvalue, space, option->alias, option->desc);
+	}
+
+	return;
+}
+
+/**
+ * Print general usage information.
+ */
+void ARGV_general_usage (void) {
 	int index;
-	char fvalue[36];
+	char fvalue[40];
 	char *space = " ";
 	Command_T *command = NULL;
 
