@@ -12,9 +12,10 @@
 #include "utils.h"
 
 #define NUM_CMDS 6
+#define NUM_LS_OPTS 4
 
 /**
- * Hex masks for commands, options.
+ * Hex masks for commands.
  */
 #define MASK_CMD_HELP  0x1
 #define MASK_CMD_VERS  0x2
@@ -22,6 +23,14 @@
 #define MASK_CMD_GET   0x8
 #define MASK_CMD_SET   0x10
 #define MASK_CMD_UNSET 0x20
+
+/**
+ * Hex masks for options.
+ */
+#define MASK_CMD_LIST_OPT_HELP ((0xFF << 0x0))
+#define MASK_CMD_LIST_OPT_USB  ((0xFF << 0x1))
+#define MASK_CMD_LIST_OPT_PCI  ((0xFF << 0x2))
+#define MASK_CMD_LIST_OPT_THUN ((0xFF << 0x3))
 
 /**
  * ASCII character codes.
@@ -40,13 +49,16 @@ typedef struct {
 	char *alias;
 	char *desc;
 	int bitmask;
-	Option_T *options;
+	Option_T (*options)[];
 } Command_T;
 
 static Command_T commands[NUM_CMDS];
+static Option_T ls_opts[NUM_LS_OPTS];
 
-int ARGV_get_command_bitmask(char *);
-int ARGV_get_option_bitmask(char *);
-void ARGV_usage(void);
+int ARGV_get_command_bitmask(const char *);
+int ARGV_get_option_bitmask(const char *, const char *);
+void ARGV_init(void);
+void ARGV_general_usage(void);
+void ARGV_command_usage(const char *);
 
 #endif /* SBCTL_ARGV_H */
