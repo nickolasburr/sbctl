@@ -11,8 +11,11 @@
 #include "error.h"
 #include "utils.h"
 
+/**
+ * Commands
+ */
+
 #define NUM_CMDS 6
-#define NUM_LS_OPTS 4
 
 /**
  * Hex masks for commands.
@@ -25,12 +28,19 @@
 #define MASK_CMD_UNSET 0x20
 
 /**
- * Hex masks for options.
+ * Command options
+ */
+
+#define NUM_LS_OPTS 5
+
+/**
+ * Hex masks for 'sbctl ls' options.
  */
 #define MASK_CMD_LIST_OPT_HELP ((0xFF << 0x0))
-#define MASK_CMD_LIST_OPT_USB  ((0xFF << 0x1))
-#define MASK_CMD_LIST_OPT_PCI  ((0xFF << 0x2))
+#define MASK_CMD_LIST_OPT_PCI  ((0xFF << 0x1))
+#define MASK_CMD_LIST_OPT_TBL  ((0xFF << 0x2))
 #define MASK_CMD_LIST_OPT_THUN ((0xFF << 0x3))
+#define MASK_CMD_LIST_OPT_USB  ((0xFF << 0x4))
 
 /**
  * ASCII character codes.

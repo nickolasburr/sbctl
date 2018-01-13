@@ -59,6 +59,12 @@ static Option_T ls_opts[] = {
 		MASK_CMD_LIST_OPT_PCI,
 	},
 	{
+		"--table",
+		"-t",
+		"Output list information in table format.",
+		MASK_CMD_LIST_OPT_TBL,
+	},
+	{
 		"--thun",
 		"-T",
 		"List Thunderbolt bridges, controllers, ports, etc.",
