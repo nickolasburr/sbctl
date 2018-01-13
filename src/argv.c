@@ -30,19 +30,19 @@ static Command_T commands[] = {
 	},
 	{
 		"unset",
-		NULL,
+		"rm",
 		"Remove properties from device.",
 		MASK_CMD_UNSET,
 	},
 	{
 		"help",
-		NULL,
+		"--help",
 		"Show usage information.",
 		MASK_CMD_HELP,
 	},
 	{
 		"version",
-		NULL,
+		"--version",
 		"Show current release version.",
 		MASK_CMD_VERS,
 	},
@@ -219,13 +219,12 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
  */
 void ARGV_command_usage (const char *cmd) {
 	int index, length;
-	char fvalue[40];
-	char *space = " ";
+	char value[40];
 	Option_T *cmd_opts = NULL;
 	Option_T *option = NULL;
 
 	fprintf(stdout, "Usage: sbctl %s [OPTIONS]\n\n", cmd);
-	fprintf(stdout, "Commands:\n\n");
+	fprintf(stdout, "Options:\n\n");
 
 	switch (ARGV_get_command_bitmask(cmd)) {
 		case MASK_CMD_LIST:
@@ -243,20 +242,19 @@ void ARGV_command_usage (const char *cmd) {
 		/**
 		 * Format command->value string.
 		 */
-		copy(fvalue, option->value);
+		copy(value, option->value);
 
 		/**
 		 * If option->alias is non-null,
 		 * format fvalue to include alias.
 		 */
 		if (!is_null(option->alias)) {
-			concat(fvalue, ",");
+			concat(value, ", ");
 		} else {
 			option->alias = "";
-			space = "";
 		}
 
-		fprintf(stdout, "%4s%-s%s%s: %-24s\n", "", fvalue, space, option->alias, option->desc);
+		fprintf(stdout, "%4s%-s%s: %-24s\n", "", value, option->alias, option->desc);
 	}
 
 	return;
@@ -267,8 +265,7 @@ void ARGV_command_usage (const char *cmd) {
  */
 void ARGV_general_usage (void) {
 	int index;
-	char fvalue[40];
-	char *space = " ";
+	char value[40];
 	Command_T *command = NULL;
 
 	fprintf(stdout, "Usage: sbctl <COMMAND> [OPTIONS]\n\n");
@@ -280,20 +277,19 @@ void ARGV_general_usage (void) {
 		/**
 		 * Format command->value string.
 		 */
-		copy(fvalue, command->value);
+		copy(value, command->value);
 
 		/**
 		 * If command->alias is non-null,
 		 * format fvalue to include alias.
 		 */
 		if (!is_null(command->alias)) {
-			concat(fvalue, ",");
+			concat(value, ", ");
 		} else {
 			command->alias = "";
-			space = "";
 		}
 
-		fprintf(stdout, "%4s%-s%s%s: %-24s\n", "", fvalue, space, command->alias, command->desc);
+		fprintf(stdout, "%4s%-s%s: %-24s\n", "", value, command->alias, command->desc);
 	}
 
 	fprintf(stdout, "\nFor a list of command-specific options: sbctl <COMMAND> [-h|--help]\n");
