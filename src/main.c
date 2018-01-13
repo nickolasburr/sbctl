@@ -1119,26 +1119,14 @@ int main (int argc, char **argv) {
 	/**
 	 * Run cleanup tasks.
 	 */
-	FREE(usbif->devices);
-	FREE(usbif);
-	FREE(ports->ports);
-	FREE(ports);
-	FREE(bridges->bridges);
-	FREE(bridges);
-	FREE(switches->switches);
-	FREE(switches);
+	FREE_ALL(usbif->devices, usbif, ports->ports, ports);
+	FREE_ALL(bridges->bridges, bridges, switches->switches, switches);
 
 	return 0;
 
 on_error:
-	FREE(usbif->devices);
-	FREE(usbif);
-	FREE(ports->ports);
-	FREE(ports);
-	FREE(bridges->bridges);
-	FREE(bridges);
-	FREE(switches->switches);
-	FREE(switches);
+	FREE_ALL(usbif->devices, usbif, ports->ports, ports);
+	FREE_ALL(bridges->bridges, bridges, switches->switches, switches);
 
 	return -1;
 }
