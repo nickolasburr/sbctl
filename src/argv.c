@@ -85,7 +85,19 @@ static Option_T ls_opts[] = {
 };
 
 /**
- * Initialize command->options[index] structs.
+ * sbctl get options.
+ */
+static Option_T get_opts[] = {
+	{
+		"--help",
+		"-h",
+		"Show usage information.",
+		MASK_CMD_GET_OPT_HELP,
+	},
+};
+
+/**
+ * Initialize command->options pointer array.
  */
 void ARGV_init (void) {
 	int index;

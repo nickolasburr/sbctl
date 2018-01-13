@@ -12,9 +12,13 @@
 #include "utils.h"
 
 /**
+ * ASCII character codes.
+ */
+#define ASCII_PERCENT 37
+
+/**
  * Commands
  */
-
 #define NUM_CMDS 6
 
 /**
@@ -31,6 +35,9 @@
  * Command options
  */
 
+/**
+ * Number of 'sbctl ls' options.
+ */
 #define NUM_LS_OPTS 5
 
 /**
@@ -43,9 +50,19 @@
 #define MASK_CMD_LIST_OPT_USB  ((0xFF << 0x4))
 
 /**
- * ASCII character codes.
+ * Number of 'sbctl get' options.
  */
-#define ASCII_PERCENT 37
+#define NUM_GET_OPTS 1
+
+/**
+ * Hex masks for 'sbctl get' options.
+ */
+#define MASK_CMD_GET_OPT_HELP ((0xFE << 0x0))
+
+/**
+ * Example usage for 'sbctl get'.
+ */
+#define EXAMPLE_USAGE_CMD_GET "sbctl get %1"
 
 typedef struct {
 	char *value;
@@ -63,6 +80,7 @@ typedef struct {
 } Command_T;
 
 static Command_T commands[NUM_CMDS];
+static Option_T get_opts[NUM_GET_OPTS];
 static Option_T ls_opts[NUM_LS_OPTS];
 
 int ARGV_get_command_bitmask(const char *);
