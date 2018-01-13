@@ -262,7 +262,7 @@ unsigned long USB_get_device_bus_power (int *err, IOUSBDeviceInterface **devif) 
 		goto on_error;
 	}
 
-	return (unsigned long) power;
+	return ((unsigned long) power << 1);
 
 on_error:
 	*err = 1;
