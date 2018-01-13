@@ -85,7 +85,19 @@ static Option_T ls_opts[] = {
 };
 
 /**
- * Initialize command->options[index] structs.
+ * sbctl get options.
+ */
+static Option_T get_opts[] = {
+	{
+		"--help",
+		"-h",
+		"Show usage information.",
+		MASK_CMD_GET_OPT_HELP,
+	},
+};
+
+/**
+ * Initialize command->options pointer array.
  */
 void ARGV_init (void) {
 	int index;
@@ -99,10 +111,14 @@ void ARGV_init (void) {
 			 * sbctl ls
 			 */
 			case MASK_CMD_LIST:
-				/**
-				 * Make command->options point to ls_opts array.
-				 */
 				command->options = &ls_opts;
+
+				break;
+			/**
+			 * sbctl get
+			 */
+			case MASK_CMD_GET:
+				command->options = &get_opts;
 
 				break;
 			default:
@@ -152,8 +168,18 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 			 * Length of command->options array.
 			 */
 			switch (ARGV_get_command_bitmask(cmd)) {
+				/**
+				 * sbctl ls
+				 */
 				case MASK_CMD_LIST:
 					length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+					break;
+				/**
+				 * sbctl get
+				 */
+				case MASK_CMD_GET:
+					length = (sizeof(get_opts) / sizeof(get_opts[0]));
 
 					break;
 				default:
@@ -185,8 +211,18 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
 			 * Length of command->options array, based on command.
 			 */
 			switch (ARGV_get_command_bitmask(cmd)) {
+				/**
+				 * sbctl ls
+				 */
 				case MASK_CMD_LIST:
 					length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+					break;
+				/**
+				 * sbctl get
+				 */
+				case MASK_CMD_GET:
+					length = (sizeof(get_opts) / sizeof(get_opts[0]));
 
 					break;
 				default:
@@ -218,18 +254,31 @@ int ARGV_get_option_bitmask (const char *cmd, const char *value) {
  * Print command-specific usage information.
  */
 void ARGV_command_usage (const char *cmd) {
-	int index, length;
+	int index, length, bitmask;
 	char value[40];
 	Option_T *cmd_opts = NULL;
 	Option_T *option = NULL;
 
+	bitmask = ARGV_get_command_bitmask(cmd);
+
 	fprintf(stdout, "Usage: sbctl %s [OPTIONS]\n\n", cmd);
 	fprintf(stdout, "Options:\n\n");
 
-	switch (ARGV_get_command_bitmask(cmd)) {
+	switch (bitmask) {
+		/**
+		 * sbctl ls
+		 */
 		case MASK_CMD_LIST:
 			cmd_opts = (Option_T *) &ls_opts;
 			length = (sizeof(ls_opts) / sizeof(ls_opts[0]));
+
+			break;
+		/**
+		 * sbctl get
+		 */
+		case MASK_CMD_GET:
+			cmd_opts = (Option_T *) &get_opts;
+			length = (sizeof(get_opts) / sizeof(get_opts[0]));
 
 			break;
 		default:
@@ -255,6 +304,22 @@ void ARGV_command_usage (const char *cmd) {
 		}
 
 		fprintf(stdout, "%4s%-s%s: %-24s\n", "", value, option->alias, option->desc);
+	}
+
+	/**
+	 * Example usage details.
+	 */
+	switch (bitmask) {
+		/**
+		 * sbctl get
+		 */
+		case MASK_CMD_GET:
+			fprintf(stdout, "\nExamples:\n\n");
+			fprintf(stdout, "%4s%-s\n", "", EXAMPLE_USAGE_CMD_GET);
+
+			break;
+		default:
+			break;
 	}
 
 	return;

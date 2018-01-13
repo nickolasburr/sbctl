@@ -10,6 +10,11 @@
 #include "common.h"
 #include "serial.h"
 
+#define THUN_MODE_NAME "thun"
+#define THUN_PORT_TYPE "port"
+#define THUN_BRID_TYPE "bridge"
+#define THUN_SWIT_TYPE "switch"
+
 #define THUN_V1 0x1
 #define THUN_V2 0x2
 #define THUN_V3 0x3
