@@ -17,19 +17,15 @@ int main (int argc, char **argv) {
 	char *vendor = NULL;
 	char *cmd_arg = NULL;
 	char *opt_arg = NULL;
-	char *lines = "---";
+	char *num_arg = NULL;
 	char *pci_smt = "pci";
 	char *usb_smt = "usb";
-	char *thun_mode = "thun";
-	char *thun_port_type = "port";
-	char *thun_brid_type = "bridge";
-	char *thun_swit_type = "switch";
 	char *usb_speed_spec = NULL;
 	char *thun_speed_spec = NULL;
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index, num_opts, opt_index;
+	int count, err, index, num_opts, opt_index, num_index;
 	int lstbl, lsusb, lspci, lsthun;
 	int start, end, entry, total_entries;
 	int power, usb_speed, thun_speed;
@@ -234,7 +230,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Type (device, hub, bridge, etc.)
 					 */
-					fprintf(stdout, "%1s%-*.4s", "", 6, lines);
+					fprintf(stdout, "%1s%-*.4s", "", 6, COLUMN_LINE);
 
 					/**
 					 * Get device locationID for bus number.
@@ -271,7 +267,7 @@ int main (int argc, char **argv) {
 					if (!is_error((int) usb_port, -1)) {
 						fprintf(stdout, "%1s%-*.2lu", "", 6, usb_port);
 					} else {
-						fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+						fprintf(stdout, "%1s%-*.3s", "", 6, COLUMN_LINE);
 					}
 
 					/**
@@ -299,7 +295,7 @@ int main (int argc, char **argv) {
 					serial = USB_get_device_serial_number(&err, &device);
 					assert(!err);
 
-					serial = !is_null(serial) ? serial : lines;
+					serial = !is_null(serial) ? serial : COLUMN_LINE;
 
 					/**
 					 * ex., Serial: 00000000
@@ -317,7 +313,7 @@ int main (int argc, char **argv) {
 					vendor = USB_get_device_vendor_name(&err, &device);
 					assert(!err);
 
-					vendor = !is_null(vendor) ? vendor : lines;
+					vendor = !is_null(vendor) ? vendor : COLUMN_LINE;
 
 					/**
 					 * ex., Vendor: Apple
@@ -327,7 +323,7 @@ int main (int argc, char **argv) {
 					product = USB_get_device_product_name(&err, &device);
 					assert(!err);
 
-					product = !is_null(product) ? product : lines;
+					product = !is_null(product) ? product : COLUMN_LINE;
 
 					/**
 					 * ex., Product Description: Apple Keyboard
@@ -369,8 +365,8 @@ int main (int argc, char **argv) {
 					 * Thunderbolt Spec, Mode, Type.
 					 */
 					fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_port_type);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_MODE_NAME);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_PORT_TYPE);
 
 					tp_bus = THUN_get_port_bus_number(&err, &port);
 					assert(!err);
@@ -380,7 +376,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Address.
 					 */
-					fprintf(stdout, "%1s%-*.3s", "", 9, lines);
+					fprintf(stdout, "%1s%-*.3s", "", 9, COLUMN_LINE);
 
 					thun_port = THUN_get_port_port_number(&err, &port);
 					assert(!err);
@@ -393,7 +389,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Power.
 					 */
-					fprintf(stdout, "%1s%-*s", "", 12, lines);
+					fprintf(stdout, "%1s%-*s", "", 12, COLUMN_LINE);
 
 					tb_vers = THUN_get_port_thunderbolt_version(&err, &port);
 					assert(!err);
@@ -415,13 +411,13 @@ int main (int argc, char **argv) {
 
 							break;
 						default:
-							fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+							fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
 					}
 
 					/**
 					 * Placeholder for Serial Number.
 					 */
-					fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+					fprintf(stdout, "%1s%-*.13s", "", 15, COLUMN_LINE);
 
 					dev_id = THUN_get_port_device_id(&err, &port);
 					assert(!err);
@@ -434,7 +430,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Vendor.
 					 */
-					fprintf(stdout, "%1s%-*.6s", "", 8, lines);
+					fprintf(stdout, "%1s%-*.6s", "", 8, COLUMN_LINE);
 
 					product = THUN_get_port_description(&err, &port);
 					assert(!err);
@@ -470,8 +466,8 @@ int main (int argc, char **argv) {
 					 * Thunderbolt Spec, Mode, Type.
 					 */
 					fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_brid_type);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_MODE_NAME);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_BRID_TYPE);
 
 					/**
 					 * Get bridge bus number.
@@ -484,21 +480,21 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Address, Port.
 					 */
-					fprintf(stdout, "%1s%-*.3s", "", 9, lines);
-					fprintf(stdout, "%1s%-*.3s", "", 6, lines);
+					fprintf(stdout, "%1s%-*.3s", "", 9, COLUMN_LINE);
+					fprintf(stdout, "%1s%-*.3s", "", 6, COLUMN_LINE);
 
 					/**
 					 * Placeholders for Power, Speed, Serial Number, and Device ID.
 					 */
-					fprintf(stdout, "%1s%-*s", "", 12, lines);
-					fprintf(stdout, "%1s%-*.5s", "", 14, lines);
-					fprintf(stdout, "%1s%-*.13s", "", 15, lines);
-					fprintf(stdout, "%1s%-*.3s", "", 12, lines);
+					fprintf(stdout, "%1s%-*s", "", 12, COLUMN_LINE);
+					fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
+					fprintf(stdout, "%1s%-*.13s", "", 15, COLUMN_LINE);
+					fprintf(stdout, "%1s%-*.3s", "", 12, COLUMN_LINE);
 
 					/**
 					 * Placeholder for Vendor.
 					 */
-					fprintf(stdout, "%1s%-*.6s", "", 8, lines);
+					fprintf(stdout, "%1s%-*.6s", "", 8, COLUMN_LINE);
 
 					/**
 					 * Get Thunderbolt bridge name.
@@ -537,8 +533,8 @@ int main (int argc, char **argv) {
 					 * Thunderbolt Spec, Mode, Type.
 					 */
 					fprintf(stdout, "%1s%-*.4s", "", 6, pci_smt);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_mode);
-					fprintf(stdout, "%1s%-*.4s", "", 6, thun_swit_type);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_MODE_NAME);
+					fprintf(stdout, "%1s%-*.4s", "", 6, THUN_SWIT_TYPE);
 
 					ts_bus = THUN_get_switch_bus_number(&err, &swit);
 					assert(!err);
@@ -548,7 +544,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Address.
 					 */
-					fprintf(stdout, "%1s%-*.3s", "", 9, lines);
+					fprintf(stdout, "%1s%-*.3s", "", 9, COLUMN_LINE);
 
 					thun_port = THUN_get_switch_port_number(&err, &swit);
 					assert(!err);
@@ -558,7 +554,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Placeholder for Power.
 					 */
-					fprintf(stdout, "%1s%-*s", "", 12, lines);
+					fprintf(stdout, "%1s%-*s", "", 12, COLUMN_LINE);
 
 					tb_vers = THUN_get_switch_thunderbolt_version(&err, &swit);
 					assert(!err);
@@ -580,13 +576,13 @@ int main (int argc, char **argv) {
 
 							break;
 						default:
-							fprintf(stdout, "%1s%-*.5s", "", 14, lines);
+							fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
 					}
 
 					/**
 					 * Placeholder for Serial Number.
 					 */
-					fprintf(stdout, "%1s%-*.13s", "", 15, lines);
+					fprintf(stdout, "%1s%-*.13s", "", 15, COLUMN_LINE);
 
 					/**
 					 * Get PCI Thunderbolt device ID.
@@ -638,10 +634,22 @@ int main (int argc, char **argv) {
 			/**
 			 * Entry index number given as command argument.
 			 */
-			opt_arg = argv[2];
+			num_arg = argv[2];
 
-			if (is_null(opt_arg)) {
-				fprintf(stderr, "%s%1s%s: Entry index required.\n", target, "", cmd_arg);
+			if (!is_null(num_arg)) {
+				/**
+				 * Handle options based on bitmask.
+				 */
+				switch (ARGV_get_option_bitmask(cmd_arg, num_arg)) {
+					case MASK_CMD_GET_OPT_HELP:
+						ARGV_command_usage(cmd_arg);
+
+						exit(EXIT_SUCCESS);
+					default:
+						break;
+				}
+			} else {
+				fprintf(stderr, "%s%1s%s: Missing argument.\n", target, "", cmd_arg);
 
 				exit(EXIT_FAILURE);
 			}
@@ -649,7 +657,7 @@ int main (int argc, char **argv) {
 			/**
 			 * Entry index numbers need to be prefixed with % sign.
 			 */
-			if (opt_arg[index] != ASCII_PERCENT) {
+			if (num_arg[index] != ASCII_PERCENT) {
 				fprintf(stderr, "%s%1s%s: Invalid format given as argument.\n", target, "", cmd_arg);
 
 				exit(EXIT_FAILURE);
@@ -659,7 +667,7 @@ int main (int argc, char **argv) {
 			 * Get up to the first five chars from opt_arg,
 			 * and copy its contents to numbers char array.
 			 */
-			while ((length(numbers) < (index + 1)) && (number = opt_arg[(index + 1)])) {
+			while ((length(numbers) < (index + 1)) && (number = num_arg[(index + 1)])) {
 				numbers[index++] = number;
 			}
 
@@ -683,7 +691,7 @@ int main (int argc, char **argv) {
 			 * Verify entry is in range {1, total_entries}.
 			 */
 			if (!((entry >= 1) && (entry <= total_entries))) {
-				fprintf(stderr, "%s%1s%s: Invalid entry index %s\n", target, "", cmd_arg, numbers);
+				fprintf(stderr, "%s%1s%s: Invalid entry %s\n", target, "", cmd_arg, numbers);
 
 				exit(EXIT_FAILURE);
 			}
@@ -719,7 +727,7 @@ int main (int argc, char **argv) {
 				fprintf(stdout, "%1s%s\n\n", "", product);
 				fprintf(stdout, "%1sSpec: %s\n", "", usb_smt);
 				fprintf(stdout, "%1sMode: %s\n", "", usb_smt);
-				fprintf(stdout, "%1sType: %s\n", "", lines);
+				fprintf(stdout, "%1sType: %s\n", "", COLUMN_LINE);
 
 				/**
 				 * Separate into new block.
@@ -761,7 +769,7 @@ int main (int argc, char **argv) {
 				if (!is_error((int) usb_port, -1)) {
 					fprintf(stdout, "%1sPort: %-*.2lu\n", "", 3, usb_port);
 				} else {
-					fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, lines);
+					fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, COLUMN_LINE);
 				}
 
 				/**
@@ -819,7 +827,7 @@ int main (int argc, char **argv) {
 				serial = USB_get_device_serial_number(&err, &device);
 				assert(!err);
 
-				serial = !is_null(serial) ? serial : lines;
+				serial = !is_null(serial) ? serial : COLUMN_LINE;
 
 				/**
 				 * ex., Serial: 00000000
@@ -837,7 +845,7 @@ int main (int argc, char **argv) {
 				vendor = USB_get_device_vendor_name(&err, &device);
 				assert(!err);
 
-				vendor = !is_null(vendor) ? vendor : lines;
+				vendor = !is_null(vendor) ? vendor : COLUMN_LINE;
 
 				/**
 				 * ex., Vendor: Apple
@@ -871,8 +879,8 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%s\n\n", "", product);
 				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
-				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
-				fprintf(stdout, "%1sType: %s\n", "", thun_port_type);
+				fprintf(stdout, "%1sMode: %s\n", "", THUN_MODE_NAME);
+				fprintf(stdout, "%1sType: %s\n", "", THUN_PORT_TYPE);
 
 				/**
 				 * Separate into new block.
@@ -887,7 +895,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Address.
 				 */
-				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				thun_port = THUN_get_port_port_number(&err, &port);
 				assert(!err);
@@ -900,7 +908,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Power.
 				 */
-				fprintf(stdout, "%1sPower: %-*s\n", "", 3, lines);
+				fprintf(stdout, "%1sPower: %-*s\n", "", 3, COLUMN_LINE);
 
 				tb_vers = THUN_get_port_thunderbolt_version(&err, &port);
 				assert(!err);
@@ -922,7 +930,7 @@ int main (int argc, char **argv) {
 
 						break;
 					default:
-						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, lines);
+						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, COLUMN_LINE);
 				}
 
 				/**
@@ -933,7 +941,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Serial Number.
 				 */
-				fprintf(stdout, "%1sSerial: %s\n", "", lines);
+				fprintf(stdout, "%1sSerial: %s\n", "", COLUMN_LINE);
 
 				dev_id = THUN_get_port_device_id(&err, &port);
 				assert(!err);
@@ -946,7 +954,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Vendor.
 				 */
-				fprintf(stdout, "%1sVendor: %s\n", "", lines);
+				fprintf(stdout, "%1sVendor: %s\n", "", COLUMN_LINE);
 
 				break;
 			}
@@ -976,8 +984,8 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%s\n\n", "", tb_name);
 				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
-				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
-				fprintf(stdout, "%1sType: %s\n", "", thun_brid_type);
+				fprintf(stdout, "%1sMode: %s\n", "", THUN_MODE_NAME);
+				fprintf(stdout, "%1sType: %s\n", "", THUN_BRID_TYPE);
 
 				/**
 				 * Separate into new block.
@@ -995,10 +1003,10 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Address, Port, Power, Speed.
 				 */
-				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
-				fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, lines);
-				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, lines);
-				fprintf(stdout, "%1sSpeed: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, COLUMN_LINE);
+				fprintf(stdout, "%1sPort: %-*.3s\n", "", 3, COLUMN_LINE);
+				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, COLUMN_LINE);
+				fprintf(stdout, "%1sSpeed: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				/**
 				 * Separate into new block.
@@ -1008,9 +1016,9 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholders for Serial Number, Device ID, and Vendor.
 				 */
-				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, lines);
-				fprintf(stdout, "%1sDevice ID: %-*.3s\n", "", 3, lines);
-				fprintf(stdout, "%1sVendor: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, COLUMN_LINE);
+				fprintf(stdout, "%1sDevice ID: %-*.3s\n", "", 3, COLUMN_LINE);
+				fprintf(stdout, "%1sVendor: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				break;
 			}
@@ -1040,8 +1048,8 @@ int main (int argc, char **argv) {
 
 				fprintf(stdout, "%1s%s\n\n", "", ts_name);
 				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
-				fprintf(stdout, "%1sMode: %s\n", "", thun_mode);
-				fprintf(stdout, "%1sType: %s\n", "", thun_swit_type);
+				fprintf(stdout, "%1sMode: %s\n", "", THUN_MODE_NAME);
+				fprintf(stdout, "%1sType: %s\n", "", THUN_SWIT_TYPE);
 
 				/**
 				 * Separate into new block.
@@ -1059,7 +1067,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Address.
 				 */
-				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sAddress: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				thun_port = THUN_get_switch_port_number(&err, &swit);
 				assert(!err);
@@ -1069,7 +1077,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Power.
 				 */
-				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sPower: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				tb_vers = THUN_get_switch_thunderbolt_version(&err, &swit);
 				assert(!err);
@@ -1091,7 +1099,7 @@ int main (int argc, char **argv) {
 
 						break;
 					default:
-						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, lines);
+						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, COLUMN_LINE);
 				}
 
 				/**
@@ -1102,7 +1110,7 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Serial Number.
 				 */
-				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, lines);
+				fprintf(stdout, "%1sSerial: %-*.3s\n", "", 3, COLUMN_LINE);
 
 				/**
 				 * Get PCI Thunderbolt device ID.
@@ -1132,7 +1140,7 @@ int main (int argc, char **argv) {
 		 * @todo: Build out set functionality.
 		 */
 		case MASK_CMD_SET:
-			fprintf(stdout, "Setting properties on device.\n");
+			fprintf(stdout, "This command is not yet implemented.\n");
 
 			break;
 		/**
@@ -1151,7 +1159,6 @@ int main (int argc, char **argv) {
 			break;
 		default:
 			fprintf(stderr, "Invalid option %s\n\n", cmd_arg);
-
 			ARGV_general_usage();
 
 			exit(EXIT_FAILURE);
