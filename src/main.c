@@ -30,7 +30,7 @@ int main (int argc, char **argv) {
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
 	int count, err, index, num_opts, opt_index;
-	int lsusb, lspci, lsthun;
+	int lstbl, lsusb, lspci, lsthun;
 	int start, end, entry, total_entries;
 	int power, usb_speed, thun_speed;
 	unsigned int tb_vers;
@@ -148,6 +148,11 @@ int main (int argc, char **argv) {
 		 * 1. sbctl list, ls [OPTIONS]
 		 */
 		case MASK_CMD_LIST:
+			lspci = 0;
+			lsusb = 0;
+			lstbl = 0;
+			lsthun = 0;
+
 			/**
 			 * Modifier options given to 'sbctl ls'.
 			 */
@@ -171,6 +176,10 @@ int main (int argc, char **argv) {
 							lsusb = 1;
 
 							break;
+						case MASK_CMD_LIST_OPT_TBL:
+							lstbl = 1;
+
+							break;
 						case MASK_CMD_LIST_OPT_THUN:
 							lsthun = 1;
 
@@ -186,7 +195,9 @@ int main (int argc, char **argv) {
 			/**
 			 * Table header.
 			 */
-			fprintf(stdout, LIST_HEADER);
+			if (lstbl) {
+				fprintf(stdout, LIST_HEADER);
+			}
 
 			/**
 			 * Entry index counter.
@@ -208,7 +219,10 @@ int main (int argc, char **argv) {
 					devif = USB_get_device_interface(&err, &device);
 					assert(!err);
 
-					fprintf(stdout, "|");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 					/**
@@ -320,10 +334,16 @@ int main (int argc, char **argv) {
 					 */
 					fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-					fprintf(stdout, "|\n");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
+					fprintf(stdout, "\n");
 
 					(*devif)->Release(devif);
 				}
+			} else {
+				count += usbif->length;
 			}
 
 			if (lsthun) {
@@ -339,7 +359,10 @@ int main (int argc, char **argv) {
 					 */
 					port = ports->ports[index];
 
-					fprintf(stdout, "|");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 					/**
@@ -418,11 +441,13 @@ int main (int argc, char **argv) {
 
 					fprintf(stdout, "%1s%-*.19s", "", 20, product);
 
-					fprintf(stdout, "|\n");
-				}
-			}
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
 
-			if (lsthun) {
+					fprintf(stdout, "\n");
+				}
+
 				/**
 				 *
 				 * PCI-PCI Thunderbolt bridges.
@@ -435,7 +460,10 @@ int main (int argc, char **argv) {
 					 */
 					bridge = bridges->bridges[index];
 
-					fprintf(stdout, "|");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 					/**
@@ -480,11 +508,13 @@ int main (int argc, char **argv) {
 
 					fprintf(stdout, "%1s%-*.19s", "", 20, tb_name);
 
-					fprintf(stdout, "|\n");
-				}
-			}
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
 
-			if (lsthun) {
+					fprintf(stdout, "\n");
+				}
+
 				/**
 				 *
 				 * Thunderbolt switches.
@@ -497,7 +527,10 @@ int main (int argc, char **argv) {
 					 */
 					swit = switches->switches[index];
 
-					fprintf(stdout, "|");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 					/**
@@ -579,11 +612,19 @@ int main (int argc, char **argv) {
 
 					fprintf(stdout, "%1s%-*.19s", "", 20, ts_name);
 
-					fprintf(stdout, "|\n");
+					if (lstbl) {
+						fprintf(stdout, "|");
+					}
+
+					fprintf(stdout, "\n");
 				}
+			} else {
+				count += (ports->length + bridges->length + switches->length);
 			}
 
-			fprintf(stdout, LIST_FOOTER);
+			if (lstbl) {
+				fprintf(stdout, LIST_FOOTER);
+			}
 
 			break;
 		/**
