@@ -192,7 +192,9 @@ int main (int argc, char **argv) {
 			 * Table header.
 			 */
 			if (lstbl) {
-				fprintf(stdout, LIST_HEADER);
+				fprintf(stdout, TABLE_LIST_HEADER);
+			} else {
+				fprintf(stdout, BASIC_LIST_HEADER);
 			}
 
 			/**
@@ -217,6 +219,8 @@ int main (int argc, char **argv) {
 
 					if (lstbl) {
 						fprintf(stdout, "|");
+					} else {
+						fprintf(stdout, "%c", ASCII_SPACE);
 					}
 
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
@@ -308,7 +312,7 @@ int main (int argc, char **argv) {
 					/**
 					 * ex., Device ID: 016
 					 */
-					fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
+					fprintf(stdout, "%1s%-*.3lu", "", 11, dev_id);
 
 					vendor = USB_get_device_vendor_name(&err, &device);
 					assert(!err);
@@ -357,6 +361,8 @@ int main (int argc, char **argv) {
 
 					if (lstbl) {
 						fprintf(stdout, "|");
+					} else {
+						fprintf(stdout, "%c", ASCII_SPACE);
 					}
 
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
@@ -425,7 +431,7 @@ int main (int argc, char **argv) {
 					/**
 					 * Device ID.
 					 */
-					fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
+					fprintf(stdout, "%1s%-*.3lu", "", 11, dev_id);
 
 					/**
 					 * Placeholder for Vendor.
@@ -458,6 +464,8 @@ int main (int argc, char **argv) {
 
 					if (lstbl) {
 						fprintf(stdout, "|");
+					} else {
+						fprintf(stdout, "%c", ASCII_SPACE);
 					}
 
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
@@ -489,7 +497,7 @@ int main (int argc, char **argv) {
 					fprintf(stdout, "%1s%-*s", "", 12, COLUMN_LINE);
 					fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
 					fprintf(stdout, "%1s%-*.13s", "", 15, COLUMN_LINE);
-					fprintf(stdout, "%1s%-*.3s", "", 12, COLUMN_LINE);
+					fprintf(stdout, "%1s%-*.3s", "", 11, COLUMN_LINE);
 
 					/**
 					 * Placeholder for Vendor.
@@ -525,6 +533,8 @@ int main (int argc, char **argv) {
 
 					if (lstbl) {
 						fprintf(stdout, "|");
+					} else {
+						fprintf(stdout, "%c", ASCII_SPACE);
 					}
 
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
@@ -590,7 +600,7 @@ int main (int argc, char **argv) {
 					dev_id = THUN_get_switch_device_id(&err, &swit);
 					assert(!err);
 
-					fprintf(stdout, "%1s%-*.3lu", "", 12, dev_id);
+					fprintf(stdout, "%1s%-*.3lu", "", 11, dev_id);
 
 					/**
 					 * Get PCI Thunderbolt switch vendor.
@@ -619,7 +629,7 @@ int main (int argc, char **argv) {
 			}
 
 			if (lstbl) {
-				fprintf(stdout, LIST_FOOTER);
+				fprintf(stdout, TABLE_LIST_FOOTER);
 			}
 
 			break;

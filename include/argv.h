@@ -12,11 +12,6 @@
 #include "utils.h"
 
 /**
- * ASCII character codes.
- */
-#define ASCII_PERCENT 37
-
-/**
  * Commands
  */
 #define NUM_CMDS 6

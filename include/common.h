@@ -32,6 +32,12 @@
 #define NOT_FOUND -1
 #define NULL_BYTE 1
 
+/**
+ * Common ASCII character codes.
+ */
+#define ASCII_PERCENT 37
+#define ASCII_SPACE 32
+
 extern volatile int looping;
 
 #endif /* SBCTL_COMMON_H */
