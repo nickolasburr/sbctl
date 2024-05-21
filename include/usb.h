@@ -7,6 +7,7 @@
 #ifndef SBCTL_USB_H
 #define SBCTL_USB_H
 
+#include "compat.h"
 #include <IOKit/usb/IOUSBLib.h>
 #include "common.h"
 #include "serial.h"

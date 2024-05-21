@@ -7,6 +7,7 @@
 #ifndef SBCTL_THUN_H
 #define SBCTL_THUN_H
 
+#include "compat.h"
 #include "common.h"
 #include "serial.h"
 
