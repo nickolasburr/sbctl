@@ -25,7 +25,8 @@ int main (int argc, char **argv) {
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index, num_opts, opt_index, num_index;
+	int count, err, index;
+	int num_opts, opt_index, num_index;
 	int lstbl, lsusb, lspci, lsthun;
 	int start, end, entry, total_entries;
 	int power, usb_speed, thun_speed;
@@ -52,9 +53,8 @@ int main (int argc, char **argv) {
 	/**
 	 * When sbctl is given with no arguments.
 	 */
-	if (!(argc - 1)) {
+	if (argc < 2) {
 		ARGV_general_usage();
-
 		exit(EXIT_FAILURE);
 	}
 
@@ -162,27 +162,28 @@ int main (int argc, char **argv) {
 					switch (ARGV_get_option_bitmask(cmd_arg, opt_arg)) {
 						case MASK_CMD_LIST_OPT_HELP:
 							ARGV_command_usage(cmd_arg);
-
 							exit(EXIT_SUCCESS);
 						case MASK_CMD_LIST_OPT_PCI:
 							lspci = 1;
-
 							break;
 						case MASK_CMD_LIST_OPT_USB:
 							lsusb = 1;
-
 							break;
 						case MASK_CMD_LIST_OPT_TBL:
 							lstbl = 1;
-
 							break;
 						case MASK_CMD_LIST_OPT_THUN:
 							lsthun = 1;
-
 							break;
 						default:
-							fprintf(stdout, "%s%1s%s: Invalid option %s\n", target, "", cmd_arg, opt_arg);
-
+							fprintf(
+								stdout,
+								"%s%1s%s: Invalid option %s\n",
+								target,
+								"",
+								cmd_arg,
+								opt_arg
+							);
 							goto on_error;
 					}
 				}
@@ -246,7 +247,13 @@ int main (int argc, char **argv) {
 					 * Format locationID into hex for strtoul.
 					 */
 					snprintf(bus_buf, 5, "%#lx", usb_lid);
-					fprintf(stdout, "%1s%-*.3d", "", 5, (int) strtoul(bus_buf, NULL, 0));
+					fprintf(
+						stdout,
+						"%1s%-*.3d",
+						"",
+						5,
+						(int) strtoul(bus_buf, NULL, 0)
+					);
 
 					/**
 					 * Get device assigned address.
@@ -406,15 +413,12 @@ int main (int argc, char **argv) {
 					switch (tb_vers) {
 						case THUN_V1:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V1_SPEED);
-
 							break;
 						case THUN_V2:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V2_SPEED);
-
 							break;
 						case THUN_V3:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V3_SPEED);
-
 							break;
 						default:
 							fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
@@ -575,15 +579,12 @@ int main (int argc, char **argv) {
 					switch (tb_vers) {
 						case THUN_V1:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V1_SPEED);
-
 							break;
 						case THUN_V2:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V2_SPEED);
-
 							break;
 						case THUN_V3:
 							fprintf(stdout, "%1s%-*.5d", "", 14, THUN_V3_SPEED);
-
 							break;
 						default:
 							fprintf(stdout, "%1s%-*.5s", "", 14, COLUMN_LINE);
@@ -653,14 +654,18 @@ int main (int argc, char **argv) {
 				switch (ARGV_get_option_bitmask(cmd_arg, num_arg)) {
 					case MASK_CMD_GET_OPT_HELP:
 						ARGV_command_usage(cmd_arg);
-
 						exit(EXIT_SUCCESS);
 					default:
 						break;
 				}
 			} else {
-				fprintf(stderr, "%s%1s%s: Missing argument.\n", target, "", cmd_arg);
-
+				fprintf(
+					stderr,
+					"%s%1s%s: Missing argument.\n",
+					target,
+					"",
+					cmd_arg
+				);
 				exit(EXIT_FAILURE);
 			}
 
@@ -668,8 +673,13 @@ int main (int argc, char **argv) {
 			 * Entry index numbers need to be prefixed with % sign.
 			 */
 			if (num_arg[index] != ASCII_PERCENT) {
-				fprintf(stderr, "%s%1s%s: Invalid format given as argument.\n", target, "", cmd_arg);
-
+				fprintf(
+					stderr,
+					"%s%1s%s: Invalid format given as argument.\n",
+					target,
+					"",
+					cmd_arg
+				);
 				exit(EXIT_FAILURE);
 			}
 
@@ -687,8 +697,14 @@ int main (int argc, char **argv) {
 			 * Verify numbers represents valid integer.
 			 */
 			if (!is_numeric(numbers)) {
-				fprintf(stderr, "%s%1s%s: %s is not a valid number.\n", target, "", cmd_arg, numbers);
-
+				fprintf(
+					stderr,
+					"%s%1s%s: %s is not a valid number.\n",
+					target,
+					"",
+					cmd_arg,
+					numbers
+				);
 				exit(EXIT_FAILURE);
 			}
 
@@ -701,8 +717,14 @@ int main (int argc, char **argv) {
 			 * Verify entry is in range {1, total_entries}.
 			 */
 			if (!((entry >= 1) && (entry <= total_entries))) {
-				fprintf(stderr, "%s%1s%s: Invalid entry %s\n", target, "", cmd_arg, numbers);
-
+				fprintf(
+					stderr,
+					"%s%1s%s: Invalid entry %s\n",
+					target,
+					"",
+					cmd_arg,
+					numbers
+				);
 				exit(EXIT_FAILURE);
 			}
 
@@ -754,7 +776,13 @@ int main (int argc, char **argv) {
 				 * Format locationID into hex for strtoul.
 				 */
 				snprintf(bus_buf, 5, "%#lx", usb_lid);
-				fprintf(stdout, "%1sBus: %-*.3d\n", "", 3, (int) strtoul(bus_buf, NULL, 0));
+				fprintf(
+					stdout,
+					"%1sBus: %-*.3d\n",
+					"",
+					3,
+					(int) strtoul(bus_buf, NULL, 0)
+				);
 
 				/**
 				 * Get device assigned address.
@@ -791,7 +819,14 @@ int main (int argc, char **argv) {
 				/**
 				 * ex., Power: 250mA
 				 */
-				fprintf(stdout, "%1sPower: %*d%s\n", "", (snprintf(0, 0, "%+d", power) - 1), power, BUS_POWER_UNITS);
+				fprintf(
+					stdout,
+					"%1sPower: %*d%s\n",
+					"",
+					(snprintf(0, 0, "%+d", power) - 1),
+					power,
+					BUS_POWER_UNITS
+				);
 
 				usb_speed = USB_get_device_speed(&err, devif);
 				assert(!err);
@@ -802,28 +837,29 @@ int main (int argc, char **argv) {
 				/**
 				 * ex., Speed: 480Mbps [High]
 				 */
-				fprintf(stdout, "%1sSpeed: %s%s", "", usb_speed_spec, DEV_SPEED_UNITS);
+				fprintf(
+					stdout,
+					"%1sSpeed: %s%s",
+					"",
+					usb_speed_spec,
+					DEV_SPEED_UNITS
+				);
 
 				switch (usb_speed) {
 					case kUSBDeviceSpeedLow:
 						fprintf(stdout, "%1s%s\n", "", "[Low]");
-
 						break;
 					case kUSBDeviceSpeedFull:
 						fprintf(stdout, "%1s%s\n", "", "[Full]");
-
 						break;
 					case kUSBDeviceSpeedHigh:
 						fprintf(stdout, "%1s%s\n", "", "[High]");
-
 						break;
 					case kUSBDeviceSpeedSuper:
 						fprintf(stdout, "%1s%s\n", "", "[Super]");
-
 						break;
 					case kUSBDeviceSpeedSuperPlus:
 						fprintf(stdout, "%1s%s\n", "", "[Super+]");
-
 						break;
 					default:
 						fprintf(stdout, "%1s%s\n", "", "[Unknown]");
@@ -929,15 +965,12 @@ int main (int argc, char **argv) {
 				switch (tb_vers) {
 					case THUN_V1:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 1]\n", "", 5, THUN_V1_SPEED);
-
 						break;
 					case THUN_V2:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 2]\n", "", 5, THUN_V2_SPEED);
-
 						break;
 					case THUN_V3:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 3]\n", "", 5, THUN_V3_SPEED);
-
 						break;
 					default:
 						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, COLUMN_LINE);
@@ -1098,15 +1131,12 @@ int main (int argc, char **argv) {
 				switch (tb_vers) {
 					case THUN_V1:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 1]\n", "", 5, THUN_V1_SPEED);
-
 						break;
 					case THUN_V2:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 2]\n", "", 5, THUN_V2_SPEED);
-
 						break;
 					case THUN_V3:
 						fprintf(stdout, "%1sSpeed: %-*.5d [Gen 3]\n", "", 5, THUN_V3_SPEED);
-
 						break;
 					default:
 						fprintf(stdout, "%1sSpeed: %-*.5s\n", "", 5, COLUMN_LINE);
@@ -1141,8 +1171,10 @@ int main (int argc, char **argv) {
 				break;
 			}
 
-			fprintf(stderr, "An error occurred. The requested device could not be located.\n");
-
+			fprintf(
+				stderr,
+				"ERROR: The requested device could not be located.\n"
+			);
 			break;
 		/**
 		 * 3. sbctl set [OPTIONS]
@@ -1151,26 +1183,22 @@ int main (int argc, char **argv) {
 		 */
 		case MASK_CMD_SET:
 			fprintf(stdout, "This command is not yet implemented.\n");
-
 			break;
 		/**
 		 * 4. sbctl help
 		 */
 		case MASK_CMD_HELP:
 			ARGV_general_usage();
-
 			break;
 		/**
 		 * 5. sbctl version
 		 */
 		case MASK_CMD_VERS:
 			fprintf(stdout, "%s\n", SBCTL_VERSION);
-
 			break;
 		default:
 			fprintf(stderr, "Invalid option %s\n\n", cmd_arg);
 			ARGV_general_usage();
-
 			exit(EXIT_FAILURE);
 	}
 
