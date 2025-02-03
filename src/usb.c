@@ -190,8 +190,8 @@ IOUSBDeviceInterface **USB_get_device_interface(
 		&score
 	);
 
-	if (result != KERN_SUCCESS || is_null(plgif)) {
-		goto on_error;
+	if (result == kIOReturnNoResources) {
+		goto on_io_error;
 	}
 
 	result = (*plgif)->QueryInterface(
@@ -206,6 +206,10 @@ IOUSBDeviceInterface **USB_get_device_interface(
 	}
 
 	return devif;
+
+on_io_error:
+	*err = -1;
+	return NULL;
 
 on_error:
 	*err = 1;
