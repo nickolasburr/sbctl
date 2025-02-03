@@ -21,12 +21,12 @@ int main (int argc, char **argv) {
 	char *pci_smt = "pci";
 	char *usb_smt = "usb";
 	char *usb_speed_spec = NULL;
-	char *thun_speed_spec = NULL;
+	/* char *thun_speed_spec = NULL; */
 	const char *tb_name = NULL;
 	const char *ts_name = NULL;
 	const char *ts_vendor = NULL;
-	int count, err, index;
-	int num_opts, opt_index, num_index;
+	int count, err;
+	int index, opt_index;
 	int lstbl, lsusb, lspci, lsthun;
 	int start, end, entry, total_entries;
 	int power, usb_speed, thun_speed;
@@ -38,7 +38,7 @@ int main (int argc, char **argv) {
 	io_service_t device, port, bridge, swit;
 	IOUSBDeviceInterface **devif;
 	USB_T *usbif;
-	Thun_T *thunif;
+	/* Thun_T *thunif; */
 	Port_T *ports;
 	Bridge_T *bridges;
 	Switch_T *switches;
@@ -192,11 +192,10 @@ int main (int argc, char **argv) {
 			/**
 			 * Table header.
 			 */
-			if (lstbl) {
-				fprintf(stdout, TABLE_LIST_HEADER);
-			} else {
-				fprintf(stdout, BASIC_LIST_HEADER);
-			}
+			fprintf(
+				stdout,
+				lstbl ? TABLE_LIST_HEADER : BASIC_LIST_HEADER
+			);
 
 			/**
 			 * Entry index counter.
@@ -216,14 +215,16 @@ int main (int argc, char **argv) {
 					 */
 					device = usbif->devices[index];
 					devif = USB_get_device_interface(&err, &device);
-					assert(!err);
 
-					if (lstbl) {
-						fprintf(stdout, "|");
-					} else {
-						fprintf(stdout, "%c", ASCII_SPACE);
+					if (err == -1) {
+						fprintf(
+							stderr,
+							"Unable to connect, skipping...\n"
+						);
+						continue;
 					}
 
+					fprintf(stdout, "%c", lstbl ? ASCII_PIPE : ASCII_SPACE);
 					fprintf(stdout, "%1s%-*.2d", "", 5, ++count);
 
 					/**
@@ -346,7 +347,6 @@ int main (int argc, char **argv) {
 					}
 
 					fprintf(stdout, "\n");
-
 					(*devif)->Release(devif);
 				}
 			} else {
@@ -687,7 +687,10 @@ int main (int argc, char **argv) {
 			 * Get up to the first five chars from opt_arg,
 			 * and copy its contents to numbers char array.
 			 */
-			while ((length(numbers) < (index + 1)) && (number = num_arg[(index + 1)])) {
+			while (
+				(length(numbers) < (index + 1))
+				&& (number = num_arg[(index + 1)])
+			) {
 				numbers[index++] = number;
 			}
 
@@ -897,7 +900,6 @@ int main (int argc, char **argv) {
 				 * ex., Vendor: Apple
 				 */
 				fprintf(stdout, "%1sVendor: %s\n", "", vendor);
-
 				break;
 			}
 
@@ -997,8 +999,12 @@ int main (int argc, char **argv) {
 				/**
 				 * Placeholder for Vendor.
 				 */
-				fprintf(stdout, "%1sVendor: %s\n", "", COLUMN_LINE);
-
+				fprintf(
+					stdout,
+					"%1sVendor: %s\n",
+					"",
+					COLUMN_LINE
+				);
 				break;
 			}
 
@@ -1089,10 +1095,18 @@ int main (int argc, char **argv) {
 				ts_name = THUN_get_switch_name(&err, &swit);
 				assert(!err);
 
-				fprintf(stdout, "%1s%s\n\n", "", ts_name);
-				fprintf(stdout, "%1sSpec: %s\n", "", pci_smt);
-				fprintf(stdout, "%1sMode: %s\n", "", THUN_MODE_NAME);
-				fprintf(stdout, "%1sType: %s\n", "", THUN_SWIT_TYPE);
+				fprintf(
+					stdout,
+					"%1s%s\n\n%1sSpec:%s\n%1sMode:%s\n%1sType:%s\n",
+					"",
+					ts_name,
+					"",
+					pci_smt,
+					"",
+					THUN_MODE_NAME,
+					"",
+					THUN_SWIT_TYPE
+				);
 
 				/**
 				 * Separate into new block.
@@ -1166,8 +1180,12 @@ int main (int argc, char **argv) {
 				ts_vendor = THUN_get_switch_vendor(&err, &swit);
 				assert(!err);
 
-				fprintf(stdout, "%1sVendor: %s\n", "", ts_vendor);
-
+				fprintf(
+					stdout,
+					"%1sVendor: %s\n",
+					"",
+					ts_vendor
+				);
 				break;
 			}
 
@@ -1197,7 +1215,11 @@ int main (int argc, char **argv) {
 			fprintf(stdout, "%s\n", SBCTL_VERSION);
 			break;
 		default:
-			fprintf(stderr, "Invalid option %s\n\n", cmd_arg);
+			fprintf(
+				stderr,
+				"Invalid option %s\n\n",
+				cmd_arg
+			);
 			ARGV_general_usage();
 			exit(EXIT_FAILURE);
 	}
@@ -1205,14 +1227,28 @@ int main (int argc, char **argv) {
 	/**
 	 * Run cleanup tasks.
 	 */
-	FREE_ALL(usbif->devices, usbif, ports->ports, ports);
-	FREE_ALL(bridges->bridges, bridges, switches->switches, switches);
-
+	FREE_ALL(
+		usbif->devices,
+		usbif,
+		ports->ports,
+		ports,
+		bridges->bridges,
+		bridges,
+		switches->switches,
+		switches
+	);
 	return 0;
 
 on_error:
-	FREE_ALL(usbif->devices, usbif, ports->ports, ports);
-	FREE_ALL(bridges->bridges, bridges, switches->switches, switches);
-
+	FREE_ALL(
+		usbif->devices,
+		usbif,
+		ports->ports,
+		ports,
+		bridges->bridges,
+		bridges,
+		switches->switches,
+		switches
+	);
 	return -1;
 }
