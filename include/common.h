@@ -36,7 +36,8 @@
  * Common ASCII character codes.
  */
 #define ASCII_PERCENT 37
-#define ASCII_SPACE 32
+#define ASCII_PIPE    124
+#define ASCII_SPACE   32
 
 extern volatile int looping;
 
